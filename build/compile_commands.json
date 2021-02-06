@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/cupchurch/git-repos/smvp-csr/build",
+  "command": "/usr/bin/gcc-8   -g   -o CMakeFiles/smvp-csr.dir/main.c.o   -c /home/cupchurch/git-repos/smvp-csr/main.c",
+  "file": "/home/cupchurch/git-repos/smvp-csr/main.c"
+}
+]
