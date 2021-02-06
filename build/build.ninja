@@ -70,6 +70,13 @@ build cmake_object_order_depends_target_smvp-csr: phony || CMakeFiles/smvp-csr.d
 build CMakeFiles/smvp-csr.dir/main.c.o: C_COMPILER__smvp-csr ../main.c || cmake_object_order_depends_target_smvp-csr
   DEP_FILE = CMakeFiles/smvp-csr.dir/main.c.o.d
   FLAGS = -g
+  INCLUDES = -I../
+  OBJECT_DIR = CMakeFiles/smvp-csr.dir
+  OBJECT_FILE_DIR = CMakeFiles/smvp-csr.dir
+build CMakeFiles/smvp-csr.dir/mmio.c.o: C_COMPILER__smvp-csr ../mmio.c || cmake_object_order_depends_target_smvp-csr
+  DEP_FILE = CMakeFiles/smvp-csr.dir/mmio.c.o.d
+  FLAGS = -g
+  INCLUDES = -I../
   OBJECT_DIR = CMakeFiles/smvp-csr.dir
   OBJECT_FILE_DIR = CMakeFiles/smvp-csr.dir
 
@@ -80,7 +87,7 @@ build CMakeFiles/smvp-csr.dir/main.c.o: C_COMPILER__smvp-csr ../main.c || cmake_
 #############################################
 # Link the executable smvp-csr
 
-build smvp-csr: C_EXECUTABLE_LINKER__smvp-csr CMakeFiles/smvp-csr.dir/main.c.o
+build smvp-csr: C_EXECUTABLE_LINKER__smvp-csr CMakeFiles/smvp-csr.dir/main.c.o CMakeFiles/smvp-csr.dir/mmio.c.o
   FLAGS = -g
   LINK_FLAGS = -rdynamic
   OBJECT_DIR = CMakeFiles/smvp-csr.dir
