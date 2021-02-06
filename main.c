@@ -1,9 +1,26 @@
-// first.c -- a simple first C program
-/* compile with:cc -g -o first first.c*/
-#include <stdio.h>      // for printf()
-#include <math.h>       // for cos()
-
-int main (int argc, char *argv[]){
-    printf ("the cosine of 1 is %g\n", cos(1.0));
-    printf ("thank you, and have a nice day\n");
-} //main
+#include <stdio.h>  // for printf()
+int aGlobalInt;     // global
+float pi = 3.14159; // global
+void someFunction()
+{
+    int aLocalVariable = 0; // local, random value but
+    // initialized to zero
+    unsigned short myShort;     // local, random value
+    static unsigned char aByte; // static, initialized to
+    // zero, persists
+    myShort = 500 + aLocalVariable;
+    aGlobalInt = 5;
+    aByte++;
+    printf("aByte: %d, myShort: %d aGlobalInt: %d\n",
+           aByte, myShort, aGlobalInt);
+} // someFunction
+int main(int argc, char *argv[])
+{
+    printf("aGlobalInt before someFunction: %d\n", aGlobalInt);
+    someFunction();
+    printf("aGlobalInt after someFunction: %d\n", aGlobalInt);
+    someFunction();
+    aGlobalInt = 23;
+    someFunction();
+    return (0);
+} // main
