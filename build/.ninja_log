@@ -21,3 +21,15 @@
 0	16	1612643592	CMakeFiles/smvp-csr.dir/main.c.o	d7df2c52d112f6d1
 0	29	1612643592	CMakeFiles/smvp-csr.dir/mmio.c.o	2797b79f06114431
 29	42	1612643592	smvp-csr	2fa16176cb1b1e0e
+0	8	1612644036	CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o	ef2b9c2ff8b39f37
+0	8	1612644036	CMakeFiles/smvp-csr.dir/main.c.o	d7df2c52d112f6d1
+0	17	1612644036	CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o	7e2a2527ccc72e67
+0	30	1612644036	CMakeFiles/mmio-readtest.dir/mmio.c.o	83478838c11704fc
+0	31	1612644036	CMakeFiles/mmio-writetest.dir/mmio.c.o	96d2a8ca6fac032d
+0	13	1612644121	mmio-readtest	b33a15f4ccdf6c3d
+0	14	1612644121	CMakeFiles/smvp-csr.dir/main.c.o	d7df2c52d112f6d1
+0	13	1612644170	smvp-csr	2fa16176cb1b1e0e
+0	19	1612644170	CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o	ef2b9c2ff8b39f37
+0	20	1612644170	CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o	7e2a2527ccc72e67
+19	32	1612644170	mmio-writetest	7f487568d9634b62
+20	34	1612644170	mmio-readtest	b33a15f4ccdf6c3d
