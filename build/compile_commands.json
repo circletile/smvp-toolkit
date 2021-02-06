@@ -1,7 +1,37 @@
 [
 {
   "directory": "/home/cupchurch/git-repos/smvp-csr/build",
-  "command": "/usr/bin/gcc-8   -g   -o CMakeFiles/smvp-csr.dir/main.c.o   -c /home/cupchurch/git-repos/smvp-csr/main.c",
+  "command": "/usr/bin/gcc-8  -I../  -g   -o CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o   -c /home/cupchurch/git-repos/smvp-csr/mmio-writetest.c",
+  "file": "/home/cupchurch/git-repos/smvp-csr/mmio-writetest.c"
+},
+
+{
+  "directory": "/home/cupchurch/git-repos/smvp-csr/build",
+  "command": "/usr/bin/gcc-8  -I../  -g   -o CMakeFiles/mmio-writetest.dir/mmio.c.o   -c /home/cupchurch/git-repos/smvp-csr/mmio.c",
+  "file": "/home/cupchurch/git-repos/smvp-csr/mmio.c"
+},
+
+{
+  "directory": "/home/cupchurch/git-repos/smvp-csr/build",
+  "command": "/usr/bin/gcc-8  -I../  -g   -o CMakeFiles/smvp-csr.dir/main.c.o   -c /home/cupchurch/git-repos/smvp-csr/main.c",
   "file": "/home/cupchurch/git-repos/smvp-csr/main.c"
+},
+
+{
+  "directory": "/home/cupchurch/git-repos/smvp-csr/build",
+  "command": "/usr/bin/gcc-8  -I../  -g   -o CMakeFiles/smvp-csr.dir/mmio.c.o   -c /home/cupchurch/git-repos/smvp-csr/mmio.c",
+  "file": "/home/cupchurch/git-repos/smvp-csr/mmio.c"
+},
+
+{
+  "directory": "/home/cupchurch/git-repos/smvp-csr/build",
+  "command": "/usr/bin/gcc-8  -I../  -g   -o CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o   -c /home/cupchurch/git-repos/smvp-csr/mmio-readtest.c",
+  "file": "/home/cupchurch/git-repos/smvp-csr/mmio-readtest.c"
+},
+
+{
+  "directory": "/home/cupchurch/git-repos/smvp-csr/build",
+  "command": "/usr/bin/gcc-8  -I../  -g   -o CMakeFiles/mmio-readtest.dir/mmio.c.o   -c /home/cupchurch/git-repos/smvp-csr/mmio.c",
+  "file": "/home/cupchurch/git-repos/smvp-csr/mmio.c"
 }
 ]

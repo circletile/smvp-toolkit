@@ -1,26 +1,29 @@
-#include <stdio.h>  // for printf()
-int aGlobalInt;     // global
-float pi = 3.14159; // global
-void someFunction()
-{
-    int aLocalVariable = 0; // local, random value but
-    // initialized to zero
-    unsigned short myShort;     // local, random value
-    static unsigned char aByte; // static, initialized to
-    // zero, persists
-    myShort = 500 + aLocalVariable;
-    aGlobalInt = 5;
-    aByte++;
-    printf("aByte: %d, myShort: %d aGlobalInt: %d\n",
-           aByte, myShort, aGlobalInt);
-} // someFunction
+/* 
+*  ==================================================================
+*  main.c v0.1 for smvp-csr
+*  ==================================================================
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "mmio.h"
+
 int main(int argc, char *argv[])
 {
-    printf("aGlobalInt before someFunction: %d\n", aGlobalInt);
-    someFunction();
-    printf("aGlobalInt after someFunction: %d\n", aGlobalInt);
-    someFunction();
-    aGlobalInt = 23;
-    someFunction();
-    return (0);
-} // main
+
+    // 1. Load the sparse matrix file
+
+    // 2. Load the vector to be multiplied
+    
+    // 3*. Visual representation of loaded matrix and vector (*if time)
+
+    // 4. DO THE THING (y=(A^n)*x using CSR)
+        // a. setup logging of overall compute time
+        // b. setup logging of per iteration compute time
+        // c. compute the product
+
+    // 5*. Visual representation of output product (*if time)
+
+    // 6. Write compute and execution time results to file(s)
+
+}

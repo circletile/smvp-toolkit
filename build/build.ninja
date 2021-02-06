@@ -31,16 +31,6 @@ include rules.ninja
 
 
 #############################################
-# Utility command for rebuild_cache
-
-build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-csr/build && /usr/bin/cmake -S/home/cupchurch/git-repos/smvp-csr -B/home/cupchurch/git-repos/smvp-csr/build
-  DESC = Running CMake to regenerate build system...
-  pool = console
-  restat = 1
-build rebuild_cache: phony CMakeFiles/rebuild_cache.util
-
-#############################################
 # Utility command for test
 
 build CMakeFiles/test.util: CUSTOM_COMMAND
@@ -59,6 +49,52 @@ build CMakeFiles/package.util: CUSTOM_COMMAND all
   pool = console
   restat = 1
 build package: phony CMakeFiles/package.util
+
+#############################################
+# Utility command for rebuild_cache
+
+build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-csr/build && /usr/bin/cmake -S/home/cupchurch/git-repos/smvp-csr -B/home/cupchurch/git-repos/smvp-csr/build
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+build rebuild_cache: phony CMakeFiles/rebuild_cache.util
+# =============================================================================
+# Object build statements for EXECUTABLE target mmio-writetest
+
+
+#############################################
+# Order-only phony target for mmio-writetest
+
+build cmake_object_order_depends_target_mmio-writetest: phony || CMakeFiles/mmio-writetest.dir
+build CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o: C_COMPILER__mmio-writetest ../mmio-writetest.c || cmake_object_order_depends_target_mmio-writetest
+  DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o.d
+  FLAGS = -g
+  INCLUDES = -I../
+  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
+  OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir
+build CMakeFiles/mmio-writetest.dir/mmio.c.o: C_COMPILER__mmio-writetest ../mmio.c || cmake_object_order_depends_target_mmio-writetest
+  DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio.c.o.d
+  FLAGS = -g
+  INCLUDES = -I../
+  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
+  OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir
+
+# =============================================================================
+# Link build statements for EXECUTABLE target mmio-writetest
+
+
+#############################################
+# Link the executable mmio-writetest
+
+build mmio-writetest: C_EXECUTABLE_LINKER__mmio-writetest CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o CMakeFiles/mmio-writetest.dir/mmio.c.o
+  FLAGS = -g
+  LINK_FLAGS = -rdynamic
+  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = mmio-writetest
+  TARGET_PDB = mmio-writetest.dbg
 # =============================================================================
 # Object build statements for EXECUTABLE target smvp-csr
 
@@ -70,6 +106,13 @@ build cmake_object_order_depends_target_smvp-csr: phony || CMakeFiles/smvp-csr.d
 build CMakeFiles/smvp-csr.dir/main.c.o: C_COMPILER__smvp-csr ../main.c || cmake_object_order_depends_target_smvp-csr
   DEP_FILE = CMakeFiles/smvp-csr.dir/main.c.o.d
   FLAGS = -g
+  INCLUDES = -I../
+  OBJECT_DIR = CMakeFiles/smvp-csr.dir
+  OBJECT_FILE_DIR = CMakeFiles/smvp-csr.dir
+build CMakeFiles/smvp-csr.dir/mmio.c.o: C_COMPILER__smvp-csr ../mmio.c || cmake_object_order_depends_target_smvp-csr
+  DEP_FILE = CMakeFiles/smvp-csr.dir/mmio.c.o.d
+  FLAGS = -g
+  INCLUDES = -I../
   OBJECT_DIR = CMakeFiles/smvp-csr.dir
   OBJECT_FILE_DIR = CMakeFiles/smvp-csr.dir
 
@@ -80,7 +123,7 @@ build CMakeFiles/smvp-csr.dir/main.c.o: C_COMPILER__smvp-csr ../main.c || cmake_
 #############################################
 # Link the executable smvp-csr
 
-build smvp-csr: C_EXECUTABLE_LINKER__smvp-csr CMakeFiles/smvp-csr.dir/main.c.o
+build smvp-csr: C_EXECUTABLE_LINKER__smvp-csr CMakeFiles/smvp-csr.dir/main.c.o CMakeFiles/smvp-csr.dir/mmio.c.o
   FLAGS = -g
   LINK_FLAGS = -rdynamic
   OBJECT_DIR = CMakeFiles/smvp-csr.dir
@@ -232,6 +275,42 @@ build NightlyConfigure: phony CMakeFiles/NightlyConfigure
 # Utility command for ExperimentalStart
 
 build ExperimentalStart: phony CMakeFiles/ExperimentalStart
+# =============================================================================
+# Object build statements for EXECUTABLE target mmio-readtest
+
+
+#############################################
+# Order-only phony target for mmio-readtest
+
+build cmake_object_order_depends_target_mmio-readtest: phony || CMakeFiles/mmio-readtest.dir
+build CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o: C_COMPILER__mmio-readtest ../mmio-readtest.c || cmake_object_order_depends_target_mmio-readtest
+  DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o.d
+  FLAGS = -g
+  INCLUDES = -I../
+  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
+  OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir
+build CMakeFiles/mmio-readtest.dir/mmio.c.o: C_COMPILER__mmio-readtest ../mmio.c || cmake_object_order_depends_target_mmio-readtest
+  DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio.c.o.d
+  FLAGS = -g
+  INCLUDES = -I../
+  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
+  OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir
+
+# =============================================================================
+# Link build statements for EXECUTABLE target mmio-readtest
+
+
+#############################################
+# Link the executable mmio-readtest
+
+build mmio-readtest: C_EXECUTABLE_LINKER__mmio-readtest CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o CMakeFiles/mmio-readtest.dir/mmio.c.o
+  FLAGS = -g
+  LINK_FLAGS = -rdynamic
+  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = mmio-readtest
+  TARGET_PDB = mmio-readtest.dbg
 
 #############################################
 # Utility command for ContinuousTest
@@ -462,7 +541,7 @@ build CMakeFiles/ExperimentalBuild: CUSTOM_COMMAND
 #############################################
 # The main all target.
 
-build all: phony smvp-csr
+build all: phony mmio-writetest smvp-csr mmio-readtest
 
 #############################################
 # Make the all target the default.
