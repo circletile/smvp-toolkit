@@ -1,11 +1,14 @@
 /* 
 *  ==================================================================
-*  main.c v0.1 for smvp-csr
+*  main.c v0.2 for smvp-csr
 *  ==================================================================
 */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "mmio.h"
 
 // ANSI terminal color escape codes for making output BEAUTIFUL
@@ -85,8 +88,10 @@ int main(int argc, char *argv[])
 
     FILE *mmInputFile, *mmOutputFile;
     MM_typecode matcode;
-    int mmio_rb_return, mmio_rs_return, mmIndex;
+    int mmio_rb_return, mmio_rs_return, index, j, compIter;
     int fInputRows, fInputCols, fInputNonZeros;
+    int *unitVector, *outputVector;
+    struct timespec start, end;
 
     // Validate user provided arguments, handle exceptions accordingly
     if (argc < 2)
@@ -106,18 +111,10 @@ int main(int argc, char *argv[])
     {
         mmioErrorHandler(mmio_rb_return);
     }
-    else
+    else if (mm_is_sparse(matcode) == 0)
     {
-        if (mm_is_sparse(matcode) == 0)
-        {
-            printf(ANSI_COLOR_RED "This application only supports sparse matricies.\nSpecified input file does not appear to contain a sparse matrix.\n" ANSI_COLOR_RESET);
-            exit(1);
-        }
-        else if (mm_is_general(matcode) == 0)
-        {
-            printf(ANSI_COLOR_RED "This application currently only supports general matricies.\nSpecified input file contains a symmetry declaration.\n" ANSI_COLOR_RESET);
-            exit(1);
-        }
+        printf(ANSI_COLOR_RED "This application only supports sparse matricies.\nSpecified input file does not appear to contain a sparse matrix.\n" ANSI_COLOR_RESET);
+        exit(1);
     }
 
     // Load sparse matrix properties from input file
@@ -130,20 +127,20 @@ int main(int argc, char *argv[])
 
     // Stage matrix content from the input file into working memory (not yet CSR compressed)
     MMRawData mmImportData[fInputNonZeros];
-    for (mmIndex = 0; mmIndex < fInputNonZeros; mmIndex++)
+    for (index = 0; index < fInputNonZeros; index++)
     {
         if (mm_is_pattern(matcode) != 0)
         {
-            fscanf(mmInputFile, "%d %d\n", &mmImportData[mmIndex].row, &mmImportData[mmIndex].col);
-            mmImportData[mmIndex].val = 1; //Not really needed, but keeps the data sane just in case it does get referenced somewhere
+            fscanf(mmInputFile, "%d %d\n", &mmImportData[index].row, &mmImportData[index].col);
+            mmImportData[index].val = 1; //Not really needed, but keeps the data sane just in case it does get referenced somewhere
         }
         else
         {
-            fscanf(mmInputFile, "%d %d %lg\n", &mmImportData[mmIndex].row, &mmImportData[mmIndex].col, &mmImportData[mmIndex].val);
+            fscanf(mmInputFile, "%d %d %lg\n", &mmImportData[index].row, &mmImportData[index].col, &mmImportData[index].val);
         }
         // Convert from 1-based coordinate system to 0-based coordinate system (make sure to unpack to the original format when writing output files!)
-        mmImportData[mmIndex].row--;
-        mmImportData[mmIndex].col--;
+        mmImportData[index].row--;
+        mmImportData[index].col--;
     }
 
     // The Matrix Market library sample runs this check, I assume its for closing the file only if it isn't somehow mapped as keyboard input
@@ -160,72 +157,86 @@ int main(int argc, char *argv[])
 
     qsort(mmImportData, fInputNonZeros, sizeof(MMRawData), mmrd_comparator); //MM format specs don't guarantee data is sorted for easy conversion to CSR...
 
-    /*
-    * [TEMP] Load/sort sanity check 
-
-    mm_write_banner(stdout, matcode);
-    mm_write_mtx_crd_size(stdout, fInputRows, fInputCols, fInputNonZeros);
-    for (mmIndex = 0; mmIndex < fInputNonZeros; mmIndex++)
+    for (index = 0; index < fInputNonZeros; index++)
     {
-        if (mm_is_pattern(matcode) != 0)
+        workingMatrix.val[index] = mmImportData[index].val;
+        workingMatrix.col_ind[index] = mmImportData[index].col;
+
+        if (index == fInputNonZeros - 1)
         {
-            fprintf(stdout, "%d %d\n", mmImportData[mmIndex].row + 1, mmImportData[mmIndex].col + 1);
+            workingMatrix.row_ptr[mmImportData[index].row + 1] = fInputNonZeros;
         }
-        else
+        else if (mmImportData[index].row < mmImportData[(index + 1)].row)
         {
-            fprintf(stdout, "%d %d %g\n", mmImportData[mmIndex].row + 1, mmImportData[mmIndex].col + 1, mmImportData[mmIndex].val);
+            workingMatrix.row_ptr[mmImportData[index].row + 1] = index + 1;
         }
+        else if (index == 0)
+        {
+            workingMatrix.row_ptr[mmImportData[index].row] = 0;
+        }
+    }
+
+    /* [DEBUG] CSR compression sanity check
+    printf(ANSI_COLOR_YELLOW "row_ptr:\n" ANSI_COLOR_RESET);
+    for (index = 0; index < fInputRows + 1; index++)
+    {
+        printf(ANSI_COLOR_YELLOW "%d  " ANSI_COLOR_RESET, workingMatrix.row_ptr[index]);
+    }
+    printf(ANSI_COLOR_MAGENTA "\nval:\n" ANSI_COLOR_RESET);
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        printf(ANSI_COLOR_MAGENTA "%g  " ANSI_COLOR_RESET, workingMatrix.val[index]);
+    }
+    printf(ANSI_COLOR_BLUE "\ncol_ind:\n" ANSI_COLOR_RESET);
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        printf(ANSI_COLOR_BLUE "%d  " ANSI_COLOR_RESET, workingMatrix.col_ind[index]);
+    }
+    printf("\n");
+    */
+
+    // Load the vector to be multiplied and prepare an output vector
+    unitVector = malloc(sizeof(int) * fInputRows);
+    outputVector = malloc(sizeof(int) * fInputRows);
+    for (index = 0; index < fInputRows; index++)
+    {
+        unitVector[index] = 1;
+        outputVector[index] = 0;
+    }
+
+    // Set up logging of compute time
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    // Compute the sparse vector multiplication
+    for (compIter = 0; compIter < 1000; compIter++)
+    {
+        for (index = 0; index < fInputRows; index++)
+        {
+            for (j = workingMatrix.row_ptr[index]; j < workingMatrix.row_ptr[index + 1]; j++)
+            {
+                outputVector[index] += workingMatrix.val[j] * unitVector[workingMatrix.col_ind[j]];
+            }
+        }
+    }
+
+    // Write compute time results to terminal and/or output file
+    clock_gettime(CLOCK_MONOTONIC, &end);
+
+    double time_taken;
+    time_taken = (end.tv_sec - start.tv_sec) * 1e9;
+    time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
+
+    printf(ANSI_COLOR_GREEN "\nTime taken by computations is : %g seconds.\n" ANSI_COLOR_RESET, time_taken);
+
+    /*
+    * [DEBUG] Output vector sanity check
+    printf(ANSI_COLOR_YELLOW "\nOutput vector:\n" ANSI_COLOR_RESET);
+    for (index = 0; index < fInputRows; index++)
+    {
+        printf("%g\n", outputVector[index]);
     }
     *
     */
 
-    for (mmIndex = 0; mmIndex < fInputNonZeros; mmIndex++)
-    {
-        workingMatrix.val[mmIndex] = mmImportData[mmIndex].val;
-        workingMatrix.col_ind[mmIndex] = mmImportData[mmIndex].col;
-
-        if (mmIndex == fInputNonZeros - 1)
-        {
-            workingMatrix.row_ptr[mmImportData[mmIndex].row + 1] = fInputNonZeros;
-        }
-        else if (mmImportData[mmIndex].row < mmImportData[(mmIndex + 1)].row)
-        {
-            workingMatrix.row_ptr[mmImportData[mmIndex].row + 1] = mmIndex + 1;
-        }
-        else if (mmIndex == 0)
-        {
-            workingMatrix.row_ptr[mmImportData[mmIndex].row] = 0;
-        }
-    }
-
-    // [TEMP] CSR compression sanity check
-    printf(ANSI_COLOR_YELLOW "row_ptr:\n" ANSI_COLOR_RESET);
-    for (mmIndex = 0; mmIndex < fInputRows + 1; mmIndex++)
-    {
-        printf(ANSI_COLOR_YELLOW "%d  " ANSI_COLOR_RESET, workingMatrix.row_ptr[mmIndex]);
-    }
-    printf(ANSI_COLOR_MAGENTA "\nval:\n" ANSI_COLOR_RESET);
-    for (mmIndex = 0; mmIndex < fInputNonZeros; mmIndex++)
-    {
-        printf(ANSI_COLOR_MAGENTA "%g  " ANSI_COLOR_RESET, workingMatrix.val[mmIndex]);
-    }
-    printf(ANSI_COLOR_BLUE "\ncol_ind:\n" ANSI_COLOR_RESET);
-    for (mmIndex = 0; mmIndex < fInputNonZeros; mmIndex++)
-    {
-        printf(ANSI_COLOR_BLUE "%d  " ANSI_COLOR_RESET, workingMatrix.col_ind[mmIndex]);
-    }
-    printf("\n");
-
-    // 2. Load the vector to be multiplied
-
-    // 3*. Visual representation of loaded matrix and vector (*if time)
-
-    // 4. DO THE THING (y=(A^n)*x using CSR)
-    // a. setup logging of overall compute time
-    // b. setup logging of per iteration compute time
-    // c. compute the product
-
-    // 5*. Visual representation of output product (*if time)
-
-    // 6. Write compute and execution time results to file(s)
+    return 0;
 }
