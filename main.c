@@ -178,6 +178,9 @@ int main(int argc, char *argv[])
         fclose(mmInputFile);
     }
 
+    printf(ANSI_COLOR_CYAN "[DATA] Non-zero numbers contained in matrix:\n" ANSI_COLOR_RESET);
+    printf("\t%d\n", fInputNonZeros);
+
     // Convert loaded data to CSR format
     printf(ANSI_COLOR_YELLOW "[INFO] Converting loaded content to CSR format.\n" ANSI_COLOR_RESET);
     workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (fInputRows + 1));
@@ -253,6 +256,8 @@ int main(int argc, char *argv[])
     fprintf(reportOutputFile, "Execution results for smvp-csr v.%d.%d.%d\n", MAJOR_VER, MINOR_VER, REVISION_VER);
     fprintf(reportOutputFile, "Generated on %lu (Unix time)\n\n", outputFileTime);
     fprintf(reportOutputFile, "Sparse matrix file in use:\n%s\n\n", inputFileName);
+    fprintf(reportOutputFile, "Non-zero numbers contained in matrix:\n");
+    fprintf(reportOutputFile, "%d\n\n", fInputNonZeros);
     fprintf(reportOutputFile, "Compute time for 1000 iterations:\n");
     fprintf(reportOutputFile, "%g seconds\n", comp_time_taken);
     fprintf(reportOutputFile, "\nOutput vector (one cell per line):\n");
