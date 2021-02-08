@@ -5,7 +5,7 @@ Build instructions:
 ```
 git clone https://github.com/circletile/smvp-csr.git
 cd smvp-csr
-cmake --build
+cmake --build ./build --config release --clean-first
 ```
 
 Run instructions:
