@@ -12,3 +12,4 @@ Run instructions:
 ```
 ./build/smvp-csr /path/to/matrixmarket/file.mtx
 ```
+After a run completes, a report file will be generated in the current working directory.
