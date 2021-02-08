@@ -1,5 +1,7 @@
 # smvp-csr
-Implement sparse matrix vector product using CSR format as part of university coursework.
+Implement a sparse matrix vector product in C using the CSR compression algorithm. This program is part of university coursework.
+
+**IMPORTANT: CMake is required to build this program. CMake is available at https://cmake.org/download/**
 
 Build instructions:
 ```
