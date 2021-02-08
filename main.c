@@ -1,10 +1,15 @@
 /* 
 *  ==================================================================
-*  main.c v0.2 for smvp-csr
+*  main.c v0.3 for smvp-csr
 *  ==================================================================
 */
 
-#define _POSIX_C_SOURCE 200809L
+#define MAJOR_VER 0
+#define MINOR_VER 3
+#define REVISION_VER 0
+#define SMVP_CSR_DEBUG 0
+
+#define _POSIX_C_SOURCE 200809L // Required to utilize HPET for execution time calculations (via CLOCK_MONOTONIC)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +43,16 @@ typedef struct _csr_data_
     double *val;
 } CSRData;
 
+// Function: vectorInit
+// Reinitializes vectors between calculation iterations
+void vectorInit(int vectorLen, double *outputVector, double val)
+{
+    for (int index = 0; index < vectorLen; index++)
+    {
+        outputVector[index] = val;
+    }
+}
+
 // Function: mmrd_comparitor
 // Provides a comparitor function that matches the format expected by stdlib qsort()
 // Sorts data by row, then by column
@@ -63,22 +78,22 @@ void mmioErrorHandler(int retcode)
 {
     if (retcode == MM_PREMATURE_EOF)
     {
-        printf(ANSI_COLOR_RED "Could not process specified Matrix Market input file.\nRequired items not present on first line of file.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR] Could not process specified Matrix Market input file. Required parameters not present on first line of file.\n" ANSI_COLOR_RESET);
         exit(1);
     }
     else if (retcode == MM_NO_HEADER)
     {
-        printf(ANSI_COLOR_RED "Could not process specified Matrix Market input file.\nRequired header is missing or file contents may not be Matrix Market formatted.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR] Could not process specified Matrix Market input file. Required header is missing or file contents may not be Matrix Market formatted.\n" ANSI_COLOR_RESET);
         exit(1);
     }
     else if (retcode == MM_UNSUPPORTED_TYPE)
     {
-        printf(ANSI_COLOR_RED "Could not process specified Matrix Market input file.\nMatrix content description not parseable or is absent.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR] Could not process specified Matrix Market input file. Matrix content description not parseable or is absent.\n" ANSI_COLOR_RESET);
         exit(1);
     }
     else
     {
-        printf(ANSI_COLOR_RED "Could not process specified Matrix Market input file.\nUnhandled exception occured during file loading .\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR] Could not process specified Matrix Market input file. Unhandled exception occured during file loading .\n" ANSI_COLOR_RESET);
         exit(1);
     }
 }
@@ -86,23 +101,35 @@ void mmioErrorHandler(int retcode)
 int main(int argc, char *argv[])
 {
 
-    FILE *mmInputFile, *mmOutputFile;
+    FILE *mmInputFile, *reportOutputFile;
+    char *outputFileName, *inputFileName;
     MM_typecode matcode;
+    CSRData workingMatrix;
     int mmio_rb_return, mmio_rs_return, index, j, compIter;
     int fInputRows, fInputCols, fInputNonZeros;
-    int *unitVector, *outputVector;
-    struct timespec start, end;
+    double *onesVector, *outputVector;
+    struct timespec tsCompStart, tsCompEnd;
+    double comp_time_taken;
+    unsigned long outputFileTime;
+
+    printf(ANSI_COLOR_GREEN "\n[START] Executing smvp-csr v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
     // Validate user provided arguments, handle exceptions accordingly
     if (argc < 2)
     {
-        fprintf(stderr, ANSI_COLOR_YELLOW "Usage: %s [martix-market-filename]\n" ANSI_COLOR_RESET, argv[0]);
+        fprintf(stderr, ANSI_COLOR_YELLOW "[HELP] Usage: %s [martix-market-filename]\n" ANSI_COLOR_RESET, argv[0]);
         exit(1);
     }
     else
     {
         if ((mmInputFile = fopen(argv[1], "r")) == NULL)
+        {
             exit(1);
+        }
+        else
+        {
+            inputFileName = argv[1];
+        }
     }
 
     // Ensure input file is of proper format and contains an appropriate matrix type
@@ -113,12 +140,14 @@ int main(int argc, char *argv[])
     }
     else if (mm_is_sparse(matcode) == 0)
     {
-        printf(ANSI_COLOR_RED "This application only supports sparse matricies.\nSpecified input file does not appear to contain a sparse matrix.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR] This application only supports sparse matricies. Specified input file does not appear to contain a sparse matrix.\n" ANSI_COLOR_RESET);
         exit(1);
     }
 
     // Load sparse matrix properties from input file
-    printf(ANSI_COLOR_YELLOW "Loading matrix content from source file...\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_MAGENTA "[FILE] Input matrix file name:\n" ANSI_COLOR_RESET);
+    printf("\t%s\n", inputFileName);
+    printf(ANSI_COLOR_YELLOW "[INFO] Loading matrix content from source file.\n" ANSI_COLOR_RESET);
     mmio_rs_return = mm_read_mtx_crd_size(mmInputFile, &fInputRows, &fInputCols, &fInputNonZeros);
     if (mmio_rs_return != 0)
     {
@@ -150,10 +179,10 @@ int main(int argc, char *argv[])
     }
 
     // Convert loaded data to CSR format
-    CSRData workingMatrix;
-    workingMatrix.row_ptr = malloc(sizeof(int) * (fInputRows + 1));
-    workingMatrix.col_ind = malloc(sizeof(int) * fInputNonZeros);
-    workingMatrix.val = malloc(sizeof(double) * fInputNonZeros);
+    printf(ANSI_COLOR_YELLOW "[INFO] Converting loaded content to CSR format.\n" ANSI_COLOR_RESET);
+    workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (fInputRows + 1));
+    workingMatrix.col_ind = (int *)malloc(sizeof(int) * fInputNonZeros);
+    workingMatrix.val = (double *)malloc(sizeof(double) * fInputNonZeros);
 
     qsort(mmImportData, fInputNonZeros, sizeof(MMRawData), mmrd_comparator); //MM format specs don't guarantee data is sorted for easy conversion to CSR...
 
@@ -176,67 +205,95 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* [DEBUG] CSR compression sanity check
-    printf(ANSI_COLOR_YELLOW "row_ptr:\n" ANSI_COLOR_RESET);
-    for (index = 0; index < fInputRows + 1; index++)
-    {
-        printf(ANSI_COLOR_YELLOW "%d  " ANSI_COLOR_RESET, workingMatrix.row_ptr[index]);
-    }
-    printf(ANSI_COLOR_MAGENTA "\nval:\n" ANSI_COLOR_RESET);
-    for (index = 0; index < fInputNonZeros; index++)
-    {
-        printf(ANSI_COLOR_MAGENTA "%g  " ANSI_COLOR_RESET, workingMatrix.val[index]);
-    }
-    printf(ANSI_COLOR_BLUE "\ncol_ind:\n" ANSI_COLOR_RESET);
-    for (index = 0; index < fInputNonZeros; index++)
-    {
-        printf(ANSI_COLOR_BLUE "%d  " ANSI_COLOR_RESET, workingMatrix.col_ind[index]);
-    }
-    printf("\n");
-    */
+    // Prepare the "ones "vector and output vector
+    onesVector = (double *)malloc(sizeof(double) * fInputRows);
+    vectorInit(fInputRows, onesVector, 1);
+    outputVector = (double *)malloc(sizeof(double) * fInputRows);
 
-    // Load the vector to be multiplied and prepare an output vector
-    unitVector = malloc(sizeof(int) * fInputRows);
-    outputVector = malloc(sizeof(int) * fInputRows);
-    for (index = 0; index < fInputRows; index++)
-    {
-        unitVector[index] = 1;
-        outputVector[index] = 0;
-    }
+    printf(ANSI_COLOR_CYAN "[DATA] Vector operand in use:\n" ANSI_COLOR_RESET);
+    printf("\tOnes vector with dimensions [%d, %d]\n", fInputRows, 1);
+
+    printf(ANSI_COLOR_YELLOW "[INFO] Computing n=1000 sparse-vector multiplication iterations.\n" ANSI_COLOR_RESET);
 
     // Set up logging of compute time
-    clock_gettime(CLOCK_MONOTONIC, &start);
+    clock_gettime(CLOCK_MONOTONIC, &tsCompStart);
 
-    // Compute the sparse vector multiplication
+    // Compute the sparse vector multiplication (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
     for (compIter = 0; compIter < 1000; compIter++)
     {
+        //Reset output vector contents between iterations
+        vectorInit(fInputRows, outputVector, 0);
+
         for (index = 0; index < fInputRows; index++)
         {
             for (j = workingMatrix.row_ptr[index]; j < workingMatrix.row_ptr[index + 1]; j++)
             {
-                outputVector[index] += workingMatrix.val[j] * unitVector[workingMatrix.col_ind[j]];
+                outputVector[index] += workingMatrix.val[j] * onesVector[workingMatrix.col_ind[j]];
             }
         }
     }
 
-    // Write compute time results to terminal and/or output file
-    clock_gettime(CLOCK_MONOTONIC, &end);
+    // Write compute time results to terminal
+    clock_gettime(CLOCK_MONOTONIC, &tsCompEnd);
 
-    double time_taken;
-    time_taken = (end.tv_sec - start.tv_sec) * 1e9;
-    time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
+    comp_time_taken = (tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
+    comp_time_taken = (comp_time_taken + (tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
+    printf(ANSI_COLOR_CYAN "[DATA] Vector product computation time:\n" ANSI_COLOR_RESET);
+    printf("\t%g seconds\n", comp_time_taken);
 
-    printf(ANSI_COLOR_GREEN "\nTime taken by computations is : %g seconds.\n" ANSI_COLOR_RESET, time_taken);
+    //  Write compute time results and output vector to file
+    outputFileName = (char *)malloc(sizeof(char) * 50); // Length is arbitrary, adjust as needed
+    outputFileTime = ((unsigned long)time(NULL));
+    snprintf(outputFileName, 50, "smvp-csr_output_%lu.txt", outputFileTime);
 
-    /*
-    * [DEBUG] Output vector sanity check
-    printf(ANSI_COLOR_YELLOW "\nOutput vector:\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_MAGENTA "[FILE] Compute time and output vector saved as:\n" ANSI_COLOR_RESET);
+    printf("\t%s\n", outputFileName);
+
+    reportOutputFile = fopen(outputFileName, "a+");
+    fprintf(reportOutputFile, "Execution results for smvp-csr v.%d.%d.%d\n", MAJOR_VER, MINOR_VER, REVISION_VER);
+    fprintf(reportOutputFile, "Generated on %lu (Unix time)\n\n", outputFileTime);
+    fprintf(reportOutputFile, "Sparse matrix file in use:\n%s\n\n", inputFileName);
+    fprintf(reportOutputFile, "Compute time for 1000 iterations:\n");
+    fprintf(reportOutputFile, "%g seconds\n", comp_time_taken);
+    fprintf(reportOutputFile, "\nOutput vector (one cell per line):\n");
+    fprintf(reportOutputFile, "[\n");
     for (index = 0; index < fInputRows; index++)
     {
-        printf("%g\n", outputVector[index]);
+        fprintf(reportOutputFile, "%g", outputVector[index]);
+        if (index < fInputRows - 1)
+        {
+            fprintf(reportOutputFile, "\n");
+        }
+        else
+        {
+            fprintf(reportOutputFile, "\n]\n\n");
+        }
     }
-    *
-    */
+
+    // Append debug info in output file if required
+    if (SMVP_CSR_DEBUG)
+    {
+        fprintf(reportOutputFile, "[DEBUG] CSR row_ptr:\n[");
+        for (index = 0; index < fInputRows + 1; index++)
+        {
+            fprintf(reportOutputFile, "%d\n", workingMatrix.row_ptr[index]);
+        }
+        fprintf(reportOutputFile, "]\n[DEBUG] CSR val:\n[");
+        for (index = 0; index < fInputNonZeros; index++)
+        {
+            fprintf(reportOutputFile, "%g\n", workingMatrix.val[index]);
+        }
+        fprintf(reportOutputFile, "]\n[DEBUG] CSR col_ind:\n[");
+        for (index = 0; index < fInputNonZeros; index++)
+        {
+            fprintf(reportOutputFile, "%d\n", workingMatrix.col_ind[index]);
+        }
+        fprintf(reportOutputFile, "]\n");
+    }
+
+    fclose(reportOutputFile);
+
+    printf(ANSI_COLOR_GREEN "[STOP] Exit smvp-csr v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
     return 0;
 }
