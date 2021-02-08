@@ -1,0 +1,13 @@
+
+Compute time for 1000 iterations:
+6.57e-05 seconds
+
+Output vector:
+[6, 21, 1, 7, 14, 7]
+
+[DEBUG] CSR row_ptr:
+0  2  5  6  9  12  16  
+[DEBUG] CSR val:
+5  1  6  7  8  1  2  3  2  9  1  4  1  2  3  1  
+[DEBUG] CSR col_ind:
+0  1  1  3  5  2  2  4  5  0  3  4  0  2  3  5  

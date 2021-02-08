@@ -38,7 +38,7 @@ typedef struct _csr_data_
     double *val;
 } CSRData;
 
-// Function: ov_Init
+// Function: vectorInit
 // Reinitializes vectors between calculation iterations
 void vectorInit(int vectorLen, double *outputVector, double val)
 {
@@ -97,7 +97,9 @@ int main(int argc, char *argv[])
 {
 
     FILE *mmInputFile, *mmOutputFile;
+    char *outputFileName;
     MM_typecode matcode;
+    CSRData workingMatrix;
     int mmio_rb_return, mmio_rs_return, index, j, compIter;
     int fInputRows, fInputCols, fInputNonZeros;
     double *onesVector, *outputVector;
@@ -162,10 +164,9 @@ int main(int argc, char *argv[])
 
     // Convert loaded data to CSR format
     printf(ANSI_COLOR_YELLOW "[INFO] Converting loaded content to CSR format...\n" ANSI_COLOR_RESET);
-    CSRData workingMatrix;
-    workingMatrix.row_ptr = malloc(sizeof(int) * (fInputRows + 1));
-    workingMatrix.col_ind = malloc(sizeof(int) * fInputNonZeros);
-    workingMatrix.val = malloc(sizeof(double) * fInputNonZeros);
+    workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (fInputRows + 1));
+    workingMatrix.col_ind = (int *)malloc(sizeof(int) * fInputNonZeros);
+    workingMatrix.val = (double *)malloc(sizeof(double) * fInputNonZeros);
 
     qsort(mmImportData, fInputNonZeros, sizeof(MMRawData), mmrd_comparator); //MM format specs don't guarantee data is sorted for easy conversion to CSR...
 
@@ -188,25 +189,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    //[DEBUG] CSR compression sanity check
-    printf(ANSI_COLOR_CYAN "[DEBUG] row_ptr:\n" ANSI_COLOR_RESET);
-    for (index = 0; index < fInputRows + 1; index++)
-    {
-        printf("%d  ", workingMatrix.row_ptr[index]);
-    }
-    printf(ANSI_COLOR_CYAN "\n[DEBUG] val:\n" ANSI_COLOR_RESET);
-    for (index = 0; index < fInputNonZeros; index++)
-    {
-        printf("%g  ", workingMatrix.val[index]);
-    }
-    printf(ANSI_COLOR_CYAN "\n[DEBUG] col_ind:\n" ANSI_COLOR_RESET);
-    for (index = 0; index < fInputNonZeros; index++)
-    {
-        printf("%d  ", workingMatrix.col_ind[index]);
-    }
-    printf("\n");
-
-    // Prepare the (unit) vector to be multiplied and output vector
+    // Prepare the "ones "vector and output vector
     onesVector = (double *)malloc(sizeof(double) * fInputRows);
     vectorInit(fInputRows, onesVector, 1);
     outputVector = (double *)malloc(sizeof(double) * fInputRows);
@@ -229,38 +212,59 @@ int main(int argc, char *argv[])
         {
             for (j = workingMatrix.row_ptr[index]; j < workingMatrix.row_ptr[index + 1]; j++)
             {
-                printf(ANSI_COLOR_CYAN "[DEBUG] Line Calc:\n" ANSI_COLOR_RESET);
-                printf("\tindex = %d, j = %d\n", index, j);
-                printf("\tOpV_precalc(%g) += WM.val(%g) * 1V(%g)\n", outputVector[index], workingMatrix.val[j], onesVector[workingMatrix.col_ind[j]]);
-
                 outputVector[index] += workingMatrix.val[j] * onesVector[workingMatrix.col_ind[j]];
             }
         }
     }
 
-    // Write compute time results to terminal and/or output file
+    // Write compute time results to terminal
     clock_gettime(CLOCK_MONOTONIC, &tsCompEnd);
 
     comp_time_taken = (tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
     comp_time_taken = (comp_time_taken + (tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
-
     printf(ANSI_COLOR_GREEN "[DONE] Computations completed in %g seconds.\n" ANSI_COLOR_RESET, comp_time_taken);
 
-    // [DEBUG] Output vector sanity check
-    printf(ANSI_COLOR_CYAN "[DEBUG] Output vector:\n" ANSI_COLOR_RESET);
-    printf("[");
+    //  Write compute time results and output vector to terminal
+    outputFileName = (char *)malloc(sizeof(char) * 50);
+    snprintf(outputFileName, 50, "smvp-csr_output_%lu.txt", ((unsigned long)time(NULL)));
+    printf(ANSI_COLOR_CYAN "[DATA] Compute time and output vector saved as %s.\n" ANSI_COLOR_RESET, outputFileName);
+
+    mmOutputFile = fopen(outputFileName, "a+");
+    fprintf(mmOutputFile, "\nCompute time for 1000 iterations:\n");
+    fprintf(mmOutputFile, "%g seconds\n", comp_time_taken);
+    fprintf(mmOutputFile, "\nOutput vector:\n");
+    fprintf(mmOutputFile, "[");
     for (index = 0; index < fInputRows; index++)
     {
-        printf("%g", outputVector[index]);
+        fprintf(mmOutputFile,"%g", outputVector[index]);
         if (index < fInputRows - 1)
         {
-            printf(", ");
+            fprintf(mmOutputFile,", ");
         }
         else
         {
-            printf("]\n");
+            fprintf(mmOutputFile,"]\n\n");
         }
     }
+
+    fprintf(mmOutputFile, "[DEBUG] CSR row_ptr:\n");
+    for (index = 0; index < fInputRows + 1; index++)
+    {
+        fprintf(mmOutputFile, "%d  ", workingMatrix.row_ptr[index]);
+    }
+    fprintf(mmOutputFile, "\n[DEBUG] CSR val:\n");
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        fprintf(mmOutputFile, "%g  ", workingMatrix.val[index]);
+    }
+    fprintf(mmOutputFile, "\n[DEBUG] CSR col_ind:\n");
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        fprintf(mmOutputFile, "%d  ", workingMatrix.col_ind[index]);
+    }
+    fprintf(mmOutputFile, "\n");
+
+    fclose(mmOutputFile);
 
     return 0;
 }
