@@ -7,7 +7,7 @@
 
 # =============================================================================
 # Project: smvp-csr
-# Configuration: Release
+# Configuration: Debug
 # =============================================================================
 # =============================================================================
 
@@ -41,7 +41,7 @@ rule C_EXECUTABLE_LINKER__mmio-writetest
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__smvp-csr
+rule C_COMPILER__smvp-toolkit
   depfile = $DEP_FILE
   deps = gcc
   command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
@@ -51,7 +51,7 @@ rule C_COMPILER__smvp-csr
 #############################################
 # Rule for linking C executable.
 
-rule C_EXECUTABLE_LINKER__smvp-csr
+rule C_EXECUTABLE_LINKER__smvp-toolkit
   command = $PRE_LINK && /usr/bin/gcc-8 $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
@@ -80,7 +80,7 @@ rule C_EXECUTABLE_LINKER__mmio-readtest
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /usr/bin/cmake -S/home/cupchurch/git-repos/smvp-csr -B/home/cupchurch/git-repos/smvp-csr/build
+  command = /usr/bin/cmake -S/home/cupchurch/git-repos/smvp-toolkit -B/home/cupchurch/git-repos/smvp-toolkit/build
   description = Re-running CMake...
   generator = 1
 

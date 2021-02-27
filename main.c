@@ -183,11 +183,11 @@ int main(int argc, char *argv[])
 
     // Convert loaded data to CSR format
     printf(ANSI_COLOR_YELLOW "[INFO] Converting loaded content to CSR format.\n" ANSI_COLOR_RESET);
-    workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (fInputRows + 1));
-    workingMatrix.col_ind = (int *)malloc(sizeof(int) * fInputNonZeros);
-    workingMatrix.val = (double *)malloc(sizeof(double) * fInputNonZeros);
+    workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
+    workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
+    workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
 
-    qsort(mmImportData, fInputNonZeros, sizeof(MMRawData), mmrd_comparator); //MM format specs don't guarantee data is sorted for easy conversion to CSR...
+    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator); //MM format specs don't guarantee data is sorted for easy conversion to CSR...
 
     for (index = 0; index < fInputNonZeros; index++)
     {
@@ -209,9 +209,9 @@ int main(int argc, char *argv[])
     }
 
     // Prepare the "ones "vector and output vector
-    onesVector = (double *)malloc(sizeof(double) * fInputRows);
+    onesVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
     vectorInit(fInputRows, onesVector, 1);
-    outputVector = (double *)malloc(sizeof(double) * fInputRows);
+    outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
 
     printf(ANSI_COLOR_CYAN "[DATA] Vector operand in use:\n" ANSI_COLOR_RESET);
     printf("\tOnes vector with dimensions [%d, %d]\n", fInputRows, 1);
@@ -239,8 +239,8 @@ int main(int argc, char *argv[])
     // Write compute time results to terminal
     clock_gettime(CLOCK_MONOTONIC, &tsCompEnd);
 
-    comp_time_taken = (tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
-    comp_time_taken = (comp_time_taken + (tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
+    comp_time_taken = (double)(tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
+    comp_time_taken = (comp_time_taken + (double)(tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
     printf(ANSI_COLOR_CYAN "[DATA] Vector product computation time:\n" ANSI_COLOR_RESET);
     printf("\t%g seconds\n", comp_time_taken);
 

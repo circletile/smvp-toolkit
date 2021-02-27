@@ -4,8 +4,8 @@
 
 
 # Configuration directories and files
-SourceDirectory: /home/cupchurch/git-repos/smvp-csr
-BuildDirectory: /home/cupchurch/git-repos/smvp-csr/build
+SourceDirectory: /home/cupchurch/git-repos/smvp-toolkit
+BuildDirectory: /home/cupchurch/git-repos/smvp-toolkit/build
 
 # Where to place the cost data store
 CostDataFile: 
@@ -36,7 +36,7 @@ ScpCommand: /usr/bin/scp
 NightlyStartTime: 00:00:00 EDT
 
 # Commands for the build/test/submit cycle
-ConfigureCommand: "/usr/bin/cmake" "/home/cupchurch/git-repos/smvp-csr"
+ConfigureCommand: "/usr/bin/cmake" "/home/cupchurch/git-repos/smvp-toolkit"
 MakeCommand: /usr/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
 DefaultCTestConfigurationType: Release
 
@@ -81,7 +81,7 @@ ValgrindCommand:
 ValgrindCommandOptions: 
 MemoryCheckType: 
 MemoryCheckSanitizerOptions: 
-MemoryCheckCommand: MEMORYCHECK_COMMAND-NOTFOUND
+MemoryCheckCommand: /usr/bin/valgrind
 MemoryCheckCommandOptions: 
 MemoryCheckSuppressionFile: 
 
