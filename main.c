@@ -17,6 +17,19 @@
 #include <gtk/gtk.h>
 #include "mmio.h"
 
+// GTK3 Object Initialization
+GtkWidget *g_main_fcbtn_input;
+GtkWidget *g_main_entry_output;
+GtkWidget *g_main_btn_fcwdgt;
+GtkWidget *g_main_sw_csr;
+GtkWidget *g_main_sw_tjds;
+GtkWidget *g_main_spinbtn_iter;
+GtkWidget *g_main_btn_runalgs;
+GtkWidget *g_main_pgbar;
+GtkWidget *g_main_pgspin;
+GtkWidget *g_fc_btn_choose;
+GtkWidget *g_fc_button_cancel;
+
 // ANSI terminal color escape codes for making output BEAUTIFUL
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
@@ -99,9 +112,31 @@ void mmioErrorHandler(int retcode)
     }
 }
 
+G_MODULE_EXPORT void fc_button_cancel_clicked_cb()
+{
+}
+
+G_MODULE_EXPORT void fc_btn_choose_clicked_cb()
+{
+}
+
+G_MODULE_EXPORT void main_btn_fcwdgt_clicked_cb()
+{
+}
+
+G_MODULE_EXPORT void main_btn_runalgs_clicked_cb()
+{
+}
+
+G_MODULE_EXPORT void appwindow_main_destroy_cb()
+{
+    gtk_main_quit();
+}
+
 int main(int argc, char *argv[])
 {
 
+    /*
     FILE *mmInputFile, *reportOutputFile;
     char *outputFileName, *inputFileName;
     MM_typecode matcode;
@@ -112,6 +147,49 @@ int main(int argc, char *argv[])
     struct timespec tsCompStart, tsCompEnd;
     double comp_time_taken;
     unsigned long outputFileTime;
+    */
+
+    // Initialize GTK framework
+    GtkBuilder *builder;
+    GtkWidget *window;
+
+    gtk_init(&argc, &argv);
+
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file(builder, "glade/smvp-tbx-main.glade", NULL);
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "appwindow_main"));
+
+    gtk_builder_add_callback_symbols(builder,
+                                     "fc_button_cancel_clicked_cb", G_CALLBACK(fc_button_cancel_clicked_cb),
+                                     "fc_btn_choose_clicked_cb", G_CALLBACK(fc_btn_choose_clicked_cb),
+                                     "main_btn_fcwdgt_clicked_cb", G_CALLBACK(main_btn_fcwdgt_clicked_cb),
+                                     "main_btn_runalgs_clicked_cb", G_CALLBACK(main_btn_runalgs_clicked_cb),
+                                     "appwindow_main_destroy_cb", G_CALLBACK(appwindow_main_destroy_cb),
+                                     NULL);
+
+    gtk_builder_connect_signals(builder, NULL);
+
+    // Get pointer addresses to GTK window objects
+    g_main_fcbtn_input = GTK_WIDGET(gtk_builder_get_object(builder, "main_fcbtn_input"));
+    g_main_entry_output = GTK_WIDGET(gtk_builder_get_object(builder, "main_entry_output"));
+    g_main_btn_fcwdgt = GTK_WIDGET(gtk_builder_get_object(builder, "main_btn_fcwdgt"));
+    g_main_sw_csr = GTK_WIDGET(gtk_builder_get_object(builder, "main_sw_csr"));
+    g_main_sw_tjds = GTK_WIDGET(gtk_builder_get_object(builder, "main_sw_tjds"));
+    g_main_spinbtn_iter = GTK_WIDGET(gtk_builder_get_object(builder, "main_spinbtn_iter"));
+    g_main_btn_runalgs = GTK_WIDGET(gtk_builder_get_object(builder, "main_btn_runalgs"));
+    g_main_pgbar = GTK_WIDGET(gtk_builder_get_object(builder, "main_pgbar"));
+    g_main_pgspin = GTK_WIDGET(gtk_builder_get_object(builder, "main_pgspin"));
+    g_fc_btn_choose = GTK_WIDGET(gtk_builder_get_object(builder, "fc_btn_choose"));
+    g_fc_button_cancel = GTK_WIDGET(gtk_builder_get_object(builder, "fc_button_cancel"));
+
+    g_object_unref(builder);
+
+    gtk_widget_show(window);
+    gtk_main();
+
+    return 0;
+
+    /*
 
     printf(ANSI_COLOR_GREEN "\n[START] Executing smvp-csr v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
@@ -302,4 +380,6 @@ int main(int argc, char *argv[])
     printf(ANSI_COLOR_GREEN "[STOP] Exit smvp-csr v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
     return 0;
+
+    */
 }
