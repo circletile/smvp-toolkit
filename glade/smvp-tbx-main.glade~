@@ -9,7 +9,7 @@
     <property name="step_increment">100</property>
     <property name="page_increment">10000</property>
   </object>
-  <object class="GtkApplicationWindow" id="applicationwindow1">
+  <object class="GtkApplicationWindow" id="appwindow_main">
     <property name="width_request">640</property>
     <property name="height_request">480</property>
     <property name="can_focus">False</property>
@@ -21,16 +21,16 @@
       <placeholder/>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkBox" id="main_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkToolbar">
+          <object class="GtkToolbar" id="main_toolbar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkToolButton" id="reset_button">
+              <object class="GtkToolButton" id="main_tb_reset_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="is_important">True</property>
@@ -44,7 +44,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="undo_button">
+              <object class="GtkToolButton" id="main_tb_undo_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="is_important">True</property>
@@ -59,7 +59,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="redo_button">
+              <object class="GtkToolButton" id="main_tb_redo_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="is_important">True</property>
@@ -74,7 +74,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="about_button">
+              <object class="GtkToolButton" id="main_tb_about_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="is_important">True</property>
@@ -95,18 +95,18 @@
           </packing>
         </child>
         <child>
-          <object class="GtkGrid">
+          <object class="GtkGrid" id="main_grid1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_right">10</property>
             <property name="margin_top">5</property>
             <property name="row_spacing">15</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="main_label_input">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Sparse Matrix File
-(Input)</property>
+                <property name="label" translatable="yes">Sparse Matrix
+Input File</property>
                 <property name="justify">center</property>
                 <property name="width_chars">18</property>
               </object>
@@ -116,19 +116,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFileChooserButton">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="title" translatable="yes"/>
-                <property name="width_chars">50</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="main_label_progress">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Task Progress</property>
@@ -139,8 +127,8 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">Execute Algorithms</property>
+              <object class="GtkButton" id="main_btn_runalgs">
+                <property name="label" translatable="yes">Run Algorithms</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -153,11 +141,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="main_label_output">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Report Folder
-(Output)</property>
+                <property name="label" translatable="yes">Report
+Output Folder</property>
                 <property name="justify">center</property>
               </object>
               <packing>
@@ -166,21 +154,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFileChooserButton">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="action">create-folder</property>
-                <property name="do_overwrite_confirmation">True</property>
-                <property name="title" translatable="yes"/>
-                <property name="width_chars">50</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkGrid">
+              <object class="GtkGrid" id="main_grid2_algs">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
@@ -234,11 +208,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="main_label_algs">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Compression
-Algorithms</property>
+                <property name="label" translatable="yes">Algorithms</property>
                 <property name="justify">center</property>
               </object>
               <packing>
@@ -247,10 +220,11 @@ Algorithms</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="main_label_iter">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Iteration Count</property>
+                <property name="label" translatable="yes">Algorithm
+Iterations</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -258,7 +232,7 @@ Algorithms</property>
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton">
+              <object class="GtkSpinButton" id="main_spinbtn_iter">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="caps_lock_warning">False</property>
@@ -271,7 +245,7 @@ Algorithms</property>
               </packing>
             </child>
             <child>
-              <object class="GtkGrid">
+              <object class="GtkGrid" id="main_grid_progress">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_right">5</property>
@@ -306,12 +280,118 @@ Algorithms</property>
                 <property name="top_attach">5</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkFileChooserButton" id="main_fcbtn_input">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="title" translatable="yes"/>
+                <property name="width_chars">50</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkGrid" id="main_grid3_output">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkButton" id="main_btn_fcwdgt">
+                    <property name="label">gtk-open</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="main_entry_output">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkFileChooserDialog" id="dialog_fc">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Select Report Output Folder</property>
+    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon_name">document-open</property>
+    <property name="type_hint">dialog</property>
+    <property name="action">select-folder</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="fc_btn_choose">
+                <property name="label" translatable="yes">Select Folder</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="fc_button_cancel">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>

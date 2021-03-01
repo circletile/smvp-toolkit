@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <gtk/gtk.h>
 #include "mmio.h"
 
 // ANSI terminal color escape codes for making output BEAUTIFUL

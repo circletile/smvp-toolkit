@@ -25,7 +25,7 @@ rule CUSTOM_COMMAND
 rule C_COMPILER__mmio-writetest
   depfile = $DEP_FILE
   deps = gcc
-  command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
+  command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -o $out   -c $in
   description = Building C object $out
 
 
@@ -44,7 +44,7 @@ rule C_EXECUTABLE_LINKER__mmio-writetest
 rule C_COMPILER__smvp-toolkit
   depfile = $DEP_FILE
   deps = gcc
-  command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
+  command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -o $out   -c $in
   description = Building C object $out
 
 
@@ -63,7 +63,7 @@ rule C_EXECUTABLE_LINKER__smvp-toolkit
 rule C_COMPILER__mmio-readtest
   depfile = $DEP_FILE
   deps = gcc
-  command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
+  command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -o $out   -c $in
   description = Building C object $out
 
 
