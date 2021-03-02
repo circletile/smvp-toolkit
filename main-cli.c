@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "mmio.h"
+#include "mmio/mmio.h"
 
 // ANSI terminal color escape codes for making output BEAUTIFUL
 #define ANSI_COLOR_RED "\x1b[31m"
