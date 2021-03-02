@@ -1,11 +1,11 @@
 /* 
 *  ==================================================================
-*  main.c v0.3 for smvp-csr
+*  main-cli.c v0.4 for smvp-toolbox
 *  ==================================================================
 */
 
 #define MAJOR_VER 0
-#define MINOR_VER 3
+#define MINOR_VER 4
 #define REVISION_VER 0
 #define SMVP_CSR_DEBUG 0
 
@@ -14,21 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <gtk/gtk.h>
 #include "mmio.h"
-
-// GTK3 Object Initialization
-GtkWidget *g_main_fcbtn_input;
-GtkWidget *g_main_entry_output;
-GtkWidget *g_main_btn_fcwdgt;
-GtkWidget *g_main_sw_csr;
-GtkWidget *g_main_sw_tjds;
-GtkWidget *g_main_spinbtn_iter;
-GtkWidget *g_main_btn_runalgs;
-GtkWidget *g_main_pgbar;
-GtkWidget *g_main_pgspin;
-GtkWidget *g_fc_btn_choose;
-GtkWidget *g_fc_button_cancel;
 
 // ANSI terminal color escape codes for making output BEAUTIFUL
 #define ANSI_COLOR_RED "\x1b[31m"
@@ -92,51 +78,29 @@ void mmioErrorHandler(int retcode)
 {
     if (retcode == MM_PREMATURE_EOF)
     {
-        printf(ANSI_COLOR_RED "[ERROR] Could not process specified Matrix Market input file. Required parameters not present on first line of file.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR]\tCould not process specified Matrix Market input file. Required parameters not present on first line of file.\n" ANSI_COLOR_RESET);
         exit(1);
     }
     else if (retcode == MM_NO_HEADER)
     {
-        printf(ANSI_COLOR_RED "[ERROR] Could not process specified Matrix Market input file. Required header is missing or file contents may not be Matrix Market formatted.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR]\tCould not process specified Matrix Market input file. Required header is missing or file contents may not be Matrix Market formatted.\n" ANSI_COLOR_RESET);
         exit(1);
     }
     else if (retcode == MM_UNSUPPORTED_TYPE)
     {
-        printf(ANSI_COLOR_RED "[ERROR] Could not process specified Matrix Market input file. Matrix content description not parseable or is absent.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR]\tCould not process specified Matrix Market input file. Matrix content description not parseable or is absent.\n" ANSI_COLOR_RESET);
         exit(1);
     }
     else
     {
-        printf(ANSI_COLOR_RED "[ERROR] Could not process specified Matrix Market input file. Unhandled exception occured during file loading .\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR]\tCould not process specified Matrix Market input file. Unhandled exception occured during file loading .\n" ANSI_COLOR_RESET);
         exit(1);
     }
-}
-
-G_MODULE_EXPORT void fc_button_cancel_clicked_cb()
-{
-}
-
-G_MODULE_EXPORT void fc_btn_choose_clicked_cb()
-{
-}
-
-G_MODULE_EXPORT void main_btn_fcwdgt_clicked_cb()
-{
-}
-
-G_MODULE_EXPORT void main_btn_runalgs_clicked_cb()
-{
-}
-
-G_MODULE_EXPORT void appwindow_main_destroy_cb()
-{
-    gtk_main_quit();
 }
 
 int main(int argc, char *argv[])
 {
 
-    /*
     FILE *mmInputFile, *reportOutputFile;
     char *outputFileName, *inputFileName;
     MM_typecode matcode;
@@ -147,56 +111,14 @@ int main(int argc, char *argv[])
     struct timespec tsCompStart, tsCompEnd;
     double comp_time_taken;
     unsigned long outputFileTime;
-    */
 
-    // Initialize GTK framework
-    GtkBuilder *builder;
-    GtkWidget *window;
 
-    gtk_init(&argc, &argv);
-
-    builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, "glade/smvp-tbx-main.glade", NULL);
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "appwindow_main"));
-
-    gtk_builder_add_callback_symbols(builder,
-                                     "fc_button_cancel_clicked_cb", G_CALLBACK(fc_button_cancel_clicked_cb),
-                                     "fc_btn_choose_clicked_cb", G_CALLBACK(fc_btn_choose_clicked_cb),
-                                     "main_btn_fcwdgt_clicked_cb", G_CALLBACK(main_btn_fcwdgt_clicked_cb),
-                                     "main_btn_runalgs_clicked_cb", G_CALLBACK(main_btn_runalgs_clicked_cb),
-                                     "appwindow_main_destroy_cb", G_CALLBACK(appwindow_main_destroy_cb),
-                                     NULL);
-
-    gtk_builder_connect_signals(builder, NULL);
-
-    // Get pointer addresses to GTK window objects
-    g_main_fcbtn_input = GTK_WIDGET(gtk_builder_get_object(builder, "main_fcbtn_input"));
-    g_main_entry_output = GTK_WIDGET(gtk_builder_get_object(builder, "main_entry_output"));
-    g_main_btn_fcwdgt = GTK_WIDGET(gtk_builder_get_object(builder, "main_btn_fcwdgt"));
-    g_main_sw_csr = GTK_WIDGET(gtk_builder_get_object(builder, "main_sw_csr"));
-    g_main_sw_tjds = GTK_WIDGET(gtk_builder_get_object(builder, "main_sw_tjds"));
-    g_main_spinbtn_iter = GTK_WIDGET(gtk_builder_get_object(builder, "main_spinbtn_iter"));
-    g_main_btn_runalgs = GTK_WIDGET(gtk_builder_get_object(builder, "main_btn_runalgs"));
-    g_main_pgbar = GTK_WIDGET(gtk_builder_get_object(builder, "main_pgbar"));
-    g_main_pgspin = GTK_WIDGET(gtk_builder_get_object(builder, "main_pgspin"));
-    g_fc_btn_choose = GTK_WIDGET(gtk_builder_get_object(builder, "fc_btn_choose"));
-    g_fc_button_cancel = GTK_WIDGET(gtk_builder_get_object(builder, "fc_button_cancel"));
-
-    g_object_unref(builder);
-
-    gtk_widget_show(window);
-    gtk_main();
-
-    return 0;
-
-    /*
-
-    printf(ANSI_COLOR_GREEN "\n[START] Executing smvp-csr v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
+    printf(ANSI_COLOR_GREEN "\n[START]\tExecuting smvp-csr v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
     // Validate user provided arguments, handle exceptions accordingly
     if (argc < 2)
     {
-        fprintf(stderr, ANSI_COLOR_YELLOW "[HELP] Usage: %s [martix-market-filename]\n" ANSI_COLOR_RESET, argv[0]);
+        fprintf(stderr, ANSI_COLOR_YELLOW "[HELP]\tUsage: %s [martix-market-filename]\n" ANSI_COLOR_RESET, argv[0]);
         exit(1);
     }
     else
@@ -219,14 +141,14 @@ int main(int argc, char *argv[])
     }
     else if (mm_is_sparse(matcode) == 0)
     {
-        printf(ANSI_COLOR_RED "[ERROR] This application only supports sparse matricies. Specified input file does not appear to contain a sparse matrix.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "[ERROR]\tThis application only supports sparse matricies. Specified input file does not appear to contain a sparse matrix.\n" ANSI_COLOR_RESET);
         exit(1);
     }
 
     // Load sparse matrix properties from input file
-    printf(ANSI_COLOR_MAGENTA "[FILE] Input matrix file name:\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_MAGENTA "[FILE]\tInput matrix file name:\n" ANSI_COLOR_RESET);
     printf("\t%s\n", inputFileName);
-    printf(ANSI_COLOR_YELLOW "[INFO] Loading matrix content from source file.\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_YELLOW "[INFO]\tLoading matrix content from source file.\n" ANSI_COLOR_RESET);
     mmio_rs_return = mm_read_mtx_crd_size(mmInputFile, &fInputRows, &fInputCols, &fInputNonZeros);
     if (mmio_rs_return != 0)
     {
@@ -257,11 +179,11 @@ int main(int argc, char *argv[])
         fclose(mmInputFile);
     }
 
-    printf(ANSI_COLOR_CYAN "[DATA] Non-zero numbers contained in matrix:\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_CYAN "[DATA]\tNon-zero numbers contained in matrix:\n" ANSI_COLOR_RESET);
     printf("\t%d\n", fInputNonZeros);
 
     // Convert loaded data to CSR format
-    printf(ANSI_COLOR_YELLOW "[INFO] Converting loaded content to CSR format.\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CSR format.\n" ANSI_COLOR_RESET);
     workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
     workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
@@ -292,10 +214,10 @@ int main(int argc, char *argv[])
     vectorInit(fInputRows, onesVector, 1);
     outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
 
-    printf(ANSI_COLOR_CYAN "[DATA] Vector operand in use:\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_CYAN "[DATA]\tVector operand in use:\n" ANSI_COLOR_RESET);
     printf("\tOnes vector with dimensions [%d, %d]\n", fInputRows, 1);
 
-    printf(ANSI_COLOR_YELLOW "[INFO] Computing n=1000 sparse-vector multiplication iterations.\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_YELLOW "[INFO]\tComputing n=1000 sparse-vector multiplication iterations.\n" ANSI_COLOR_RESET);
 
     // Set up logging of compute time
     clock_gettime(CLOCK_MONOTONIC, &tsCompStart);
@@ -320,7 +242,7 @@ int main(int argc, char *argv[])
 
     comp_time_taken = (double)(tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
     comp_time_taken = (comp_time_taken + (double)(tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
-    printf(ANSI_COLOR_CYAN "[DATA] Vector product computation time:\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_CYAN "[DATA]\tVector product computation time:\n" ANSI_COLOR_RESET);
     printf("\t%g seconds\n", comp_time_taken);
 
     //  Write compute time results and output vector to file
@@ -328,7 +250,7 @@ int main(int argc, char *argv[])
     outputFileTime = ((unsigned long)time(NULL));
     snprintf(outputFileName, 50, "smvp-csr_output_%lu.txt", outputFileTime);
 
-    printf(ANSI_COLOR_MAGENTA "[FILE] Compute time and output vector saved as:\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_MAGENTA "[FILE]\tCompute time and output vector saved as:\n" ANSI_COLOR_RESET);
     printf("\t%s\n", outputFileName);
 
     reportOutputFile = fopen(outputFileName, "a+");
@@ -357,17 +279,17 @@ int main(int argc, char *argv[])
     // Append debug info in output file if required
     if (SMVP_CSR_DEBUG)
     {
-        fprintf(reportOutputFile, "[DEBUG] CSR row_ptr:\n[");
+        fprintf(reportOutputFile, "[DEBUG]\tCSR row_ptr:\n[");
         for (index = 0; index < fInputRows + 1; index++)
         {
             fprintf(reportOutputFile, "%d\n", workingMatrix.row_ptr[index]);
         }
-        fprintf(reportOutputFile, "]\n[DEBUG] CSR val:\n[");
+        fprintf(reportOutputFile, "]\n[DEBUG]\tCSR val:\n[");
         for (index = 0; index < fInputNonZeros; index++)
         {
             fprintf(reportOutputFile, "%g\n", workingMatrix.val[index]);
         }
-        fprintf(reportOutputFile, "]\n[DEBUG] CSR col_ind:\n[");
+        fprintf(reportOutputFile, "]\n[DEBUG]\tCSR col_ind:\n[");
         for (index = 0; index < fInputNonZeros; index++)
         {
             fprintf(reportOutputFile, "%d\n", workingMatrix.col_ind[index]);
@@ -377,9 +299,8 @@ int main(int argc, char *argv[])
 
     fclose(reportOutputFile);
 
-    printf(ANSI_COLOR_GREEN "[STOP] Exit smvp-csr v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
+    printf(ANSI_COLOR_GREEN "[STOP]\tExit smvp-csr v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
     return 0;
 
-    */
 }

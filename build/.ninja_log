@@ -43,3 +43,12 @@
 108	145	1614586715	smvp-toolkit	e73d921e41a8abad
 0	110	1614587545	CMakeFiles/smvp-toolkit.dir/main.c.o	5ee01791e6749eaf
 111	146	1614587545	smvp-toolkit	e73d921e41a8abad
+1	50	1614707171	CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o	86d29d143cb6dfd8
+1	50	1614707171	CMakeFiles/smvp-toolkit-cli.dir/mmio.c.o	3d02c7385b651969
+50	71	1614707171	smvp-toolkit-cli	b40e24610817f6d2
+1	117	1614707171	CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o	95d592dfb7367f96
+117	154	1614707171	smvp-toolkit-gui	2c98bb763951fc60
+0	19	1614707226	CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o	86d29d143cb6dfd8
+19	32	1614707226	smvp-toolkit-cli	b40e24610817f6d2
+0	20	1614707413	CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o	86d29d143cb6dfd8
+20	32	1614707413	smvp-toolkit-cli	b40e24610817f6d2
