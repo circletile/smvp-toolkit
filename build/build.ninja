@@ -31,24 +31,83 @@ include rules.ninja
 
 
 #############################################
-# Utility command for test
+# Utility command for ExperimentalBuild
 
-build CMakeFiles/test.util: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest --force-new-ctest-process
-  DESC = Running tests...
-  pool = console
-  restat = 1
-build test: phony CMakeFiles/test.util
+build ExperimentalBuild: phony CMakeFiles/ExperimentalBuild
 
 #############################################
-# Utility command for package
+# Utility command for ContinuousUpdate
 
-build CMakeFiles/package.util: CUSTOM_COMMAND all
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/cpack --config ./CPackConfig.cmake
-  DESC = Run CPack packaging tool...
-  pool = console
-  restat = 1
-build package: phony CMakeFiles/package.util
+build ContinuousUpdate: phony CMakeFiles/ContinuousUpdate
+# =============================================================================
+# Object build statements for EXECUTABLE target mmio-readtest
+
+
+#############################################
+# Order-only phony target for mmio-readtest
+
+build cmake_object_order_depends_target_mmio-readtest: phony || CMakeFiles/mmio-readtest.dir
+build CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o: C_COMPILER__mmio-readtest ../mmio-readtest.c || cmake_object_order_depends_target_mmio-readtest
+  DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o.d
+  FLAGS = -pthread
+  INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
+  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
+  OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir
+build CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o: C_COMPILER__mmio-readtest ../mmio/mmio.c || cmake_object_order_depends_target_mmio-readtest
+  DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o.d
+  FLAGS = -pthread
+  INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
+  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
+  OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir/mmio
+
+# =============================================================================
+# Link build statements for EXECUTABLE target mmio-readtest
+
+
+#############################################
+# Link the executable mmio-readtest
+
+build mmio-readtest: C_EXECUTABLE_LINKER__mmio-readtest CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o
+  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = mmio-readtest
+  TARGET_PDB = mmio-readtest.dbg
+
+#############################################
+# Utility command for ExperimentalStart
+
+build ExperimentalStart: phony CMakeFiles/ExperimentalStart
+
+#############################################
+# Utility command for Nightly
+
+build Nightly: phony CMakeFiles/Nightly
+
+#############################################
+# Utility command for ContinuousCoverage
+
+build ContinuousCoverage: phony CMakeFiles/ContinuousCoverage
+
+#############################################
+# Utility command for ContinuousStart
+
+build ContinuousStart: phony CMakeFiles/ContinuousStart
+
+#############################################
+# Utility command for ExperimentalCoverage
+
+build ExperimentalCoverage: phony CMakeFiles/ExperimentalCoverage
+
+#############################################
+# Utility command for NightlyConfigure
+
+build NightlyConfigure: phony CMakeFiles/NightlyConfigure
+
+#############################################
+# Utility command for NightlyCoverage
+
+build NightlyCoverage: phony CMakeFiles/NightlyCoverage
 
 #############################################
 # Utility command for rebuild_cache
@@ -59,112 +118,20 @@ build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
   pool = console
   restat = 1
 build rebuild_cache: phony CMakeFiles/rebuild_cache.util
-# =============================================================================
-# Object build statements for EXECUTABLE target mmio-writetest
-
 
 #############################################
-# Order-only phony target for mmio-writetest
+# Utility command for NightlyTest
 
-build cmake_object_order_depends_target_mmio-writetest: phony || CMakeFiles/mmio-writetest.dir
-build CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o: C_COMPILER__mmio-writetest ../mmio-writetest.c || cmake_object_order_depends_target_mmio-writetest
-  DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o.d
-  FLAGS = -g
-  INCLUDES = -I../
-  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
-  OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir
-build CMakeFiles/mmio-writetest.dir/mmio.c.o: C_COMPILER__mmio-writetest ../mmio.c || cmake_object_order_depends_target_mmio-writetest
-  DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio.c.o.d
-  FLAGS = -g
-  INCLUDES = -I../
-  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
-  OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir
-
-# =============================================================================
-# Link build statements for EXECUTABLE target mmio-writetest
-
+build NightlyTest: phony CMakeFiles/NightlyTest
 
 #############################################
-# Link the executable mmio-writetest
+# Utility command for edit_cache
 
-build mmio-writetest: C_EXECUTABLE_LINKER__mmio-writetest CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o CMakeFiles/mmio-writetest.dir/mmio.c.o
-  FLAGS = -g
-  LINK_FLAGS = -rdynamic
-  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
-  POST_BUILD = :
-  PRE_LINK = :
-  TARGET_FILE = mmio-writetest
-  TARGET_PDB = mmio-writetest.dbg
-
-#############################################
-# Utility command for ContinuousSubmit
-
-build ContinuousSubmit: phony CMakeFiles/ContinuousSubmit
-
-#############################################
-# Utility command for ContinuousMemCheck
-
-build ContinuousMemCheck: phony CMakeFiles/ContinuousMemCheck
-
-#############################################
-# Utility command for ContinuousConfigure
-
-build ContinuousConfigure: phony CMakeFiles/ContinuousConfigure
-
-#############################################
-# Utility command for ExperimentalSubmit
-
-build ExperimentalSubmit: phony CMakeFiles/ExperimentalSubmit
-
-#############################################
-# Utility command for ExperimentalMemCheck
-
-build ExperimentalMemCheck: phony CMakeFiles/ExperimentalMemCheck
-
-#############################################
-# Utility command for ExperimentalTest
-
-build ExperimentalTest: phony CMakeFiles/ExperimentalTest
-
-#############################################
-# Utility command for NightlyUpdate
-
-build NightlyUpdate: phony CMakeFiles/NightlyUpdate
-
-#############################################
-# Utility command for NightlyStart
-
-build NightlyStart: phony CMakeFiles/NightlyStart
-
-#############################################
-# Utility command for NightlyMemoryCheck
-
-build NightlyMemoryCheck: phony CMakeFiles/NightlyMemoryCheck
-
-#############################################
-# Utility command for NightlyBuild
-
-build NightlyBuild: phony CMakeFiles/NightlyBuild
-
-#############################################
-# Utility command for ExperimentalUpdate
-
-build ExperimentalUpdate: phony CMakeFiles/ExperimentalUpdate
-
-#############################################
-# Utility command for ContinuousBuild
-
-build ContinuousBuild: phony CMakeFiles/ContinuousBuild
-
-#############################################
-# Utility command for Continuous
-
-build Continuous: phony CMakeFiles/Continuous
-
-#############################################
-# Utility command for Experimental
-
-build Experimental: phony CMakeFiles/Experimental
+build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  DESC = No interactive CMake dialog available...
+  restat = 1
+build edit_cache: phony CMakeFiles/edit_cache.util
 
 #############################################
 # Utility command for package_source
@@ -177,140 +144,24 @@ build CMakeFiles/package_source.util: CUSTOM_COMMAND
 build package_source: phony CMakeFiles/package_source.util
 
 #############################################
-# Utility command for ExperimentalConfigure
+# Utility command for Experimental
 
-build ExperimentalConfigure: phony CMakeFiles/ExperimentalConfigure
-
-#############################################
-# Utility command for edit_cache
-
-build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
-  DESC = No interactive CMake dialog available...
-  restat = 1
-build edit_cache: phony CMakeFiles/edit_cache.util
+build Experimental: phony CMakeFiles/Experimental
 
 #############################################
-# Utility command for NightlyTest
+# Utility command for Continuous
 
-build NightlyTest: phony CMakeFiles/NightlyTest
-# =============================================================================
-# Object build statements for EXECUTABLE target smvp-toolkit
-
+build Continuous: phony CMakeFiles/Continuous
 
 #############################################
-# Order-only phony target for smvp-toolkit
+# Utility command for ContinuousBuild
 
-build cmake_object_order_depends_target_smvp-toolkit: phony || CMakeFiles/smvp-toolkit.dir
-build CMakeFiles/smvp-toolkit.dir/main.c.o: C_COMPILER__smvp-toolkit ../main.c || cmake_object_order_depends_target_smvp-toolkit
-  DEP_FILE = CMakeFiles/smvp-toolkit.dir/main.c.o.d
-  FLAGS = -g   -Wall -Wextra -Wpedantic -Werror -Wconversion
-  INCLUDES = -I../
-  OBJECT_DIR = CMakeFiles/smvp-toolkit.dir
-  OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit.dir
-build CMakeFiles/smvp-toolkit.dir/mmio.c.o: C_COMPILER__smvp-toolkit ../mmio.c || cmake_object_order_depends_target_smvp-toolkit
-  DEP_FILE = CMakeFiles/smvp-toolkit.dir/mmio.c.o.d
-  FLAGS = -g   -Wall -Wextra -Wpedantic -Werror -Wconversion
-  INCLUDES = -I../
-  OBJECT_DIR = CMakeFiles/smvp-toolkit.dir
-  OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit.dir
-
-# =============================================================================
-# Link build statements for EXECUTABLE target smvp-toolkit
-
+build ContinuousBuild: phony CMakeFiles/ContinuousBuild
 
 #############################################
-# Link the executable smvp-toolkit
+# Utility command for ExperimentalUpdate
 
-build smvp-toolkit: C_EXECUTABLE_LINKER__smvp-toolkit CMakeFiles/smvp-toolkit.dir/main.c.o CMakeFiles/smvp-toolkit.dir/mmio.c.o
-  FLAGS = -g
-  LINK_FLAGS = -rdynamic
-  OBJECT_DIR = CMakeFiles/smvp-toolkit.dir
-  POST_BUILD = :
-  PRE_LINK = :
-  TARGET_FILE = smvp-toolkit
-  TARGET_PDB = smvp-toolkit.dbg
-
-#############################################
-# Utility command for NightlyCoverage
-
-build NightlyCoverage: phony CMakeFiles/NightlyCoverage
-
-#############################################
-# Utility command for ExperimentalCoverage
-
-build ExperimentalCoverage: phony CMakeFiles/ExperimentalCoverage
-
-#############################################
-# Utility command for NightlyMemCheck
-
-build NightlyMemCheck: phony CMakeFiles/NightlyMemCheck
-
-#############################################
-# Utility command for ContinuousStart
-
-build ContinuousStart: phony CMakeFiles/ContinuousStart
-
-#############################################
-# Utility command for NightlySubmit
-
-build NightlySubmit: phony CMakeFiles/NightlySubmit
-
-#############################################
-# Utility command for ContinuousCoverage
-
-build ContinuousCoverage: phony CMakeFiles/ContinuousCoverage
-
-#############################################
-# Utility command for Nightly
-
-build Nightly: phony CMakeFiles/Nightly
-
-#############################################
-# Utility command for NightlyConfigure
-
-build NightlyConfigure: phony CMakeFiles/NightlyConfigure
-
-#############################################
-# Utility command for ExperimentalStart
-
-build ExperimentalStart: phony CMakeFiles/ExperimentalStart
-# =============================================================================
-# Object build statements for EXECUTABLE target mmio-readtest
-
-
-#############################################
-# Order-only phony target for mmio-readtest
-
-build cmake_object_order_depends_target_mmio-readtest: phony || CMakeFiles/mmio-readtest.dir
-build CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o: C_COMPILER__mmio-readtest ../mmio-readtest.c || cmake_object_order_depends_target_mmio-readtest
-  DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o.d
-  FLAGS = -g
-  INCLUDES = -I../
-  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
-  OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir
-build CMakeFiles/mmio-readtest.dir/mmio.c.o: C_COMPILER__mmio-readtest ../mmio.c || cmake_object_order_depends_target_mmio-readtest
-  DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio.c.o.d
-  FLAGS = -g
-  INCLUDES = -I../
-  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
-  OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir
-
-# =============================================================================
-# Link build statements for EXECUTABLE target mmio-readtest
-
-
-#############################################
-# Link the executable mmio-readtest
-
-build mmio-readtest: C_EXECUTABLE_LINKER__mmio-readtest CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o CMakeFiles/mmio-readtest.dir/mmio.c.o
-  FLAGS = -g
-  LINK_FLAGS = -rdynamic
-  OBJECT_DIR = CMakeFiles/mmio-readtest.dir
-  POST_BUILD = :
-  PRE_LINK = :
-  TARGET_FILE = mmio-readtest
-  TARGET_PDB = mmio-readtest.dbg
+build ExperimentalUpdate: phony CMakeFiles/ExperimentalUpdate
 
 #############################################
 # Utility command for ContinuousTest
@@ -318,195 +169,192 @@ build mmio-readtest: C_EXECUTABLE_LINKER__mmio-readtest CMakeFiles/mmio-readtest
 build ContinuousTest: phony CMakeFiles/ContinuousTest
 
 #############################################
-# Utility command for ContinuousUpdate
+# Utility command for NightlySubmit
 
-build ContinuousUpdate: phony CMakeFiles/ContinuousUpdate
-
-#############################################
-# Utility command for ExperimentalBuild
-
-build ExperimentalBuild: phony CMakeFiles/ExperimentalBuild
+build NightlySubmit: phony CMakeFiles/NightlySubmit
 
 #############################################
-# Custom command for CMakeFiles/ContinuousSubmit
+# Utility command for NightlyBuild
 
-build CMakeFiles/ContinuousSubmit: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousSubmit
+build NightlyBuild: phony CMakeFiles/NightlyBuild
+
+#############################################
+# Utility command for NightlyMemoryCheck
+
+build NightlyMemoryCheck: phony CMakeFiles/NightlyMemoryCheck
+
+#############################################
+# Utility command for NightlyStart
+
+build NightlyStart: phony CMakeFiles/NightlyStart
+
+#############################################
+# Utility command for NightlyUpdate
+
+build NightlyUpdate: phony CMakeFiles/NightlyUpdate
+
+#############################################
+# Utility command for ExperimentalTest
+
+build ExperimentalTest: phony CMakeFiles/ExperimentalTest
+
+#############################################
+# Utility command for ExperimentalMemCheck
+
+build ExperimentalMemCheck: phony CMakeFiles/ExperimentalMemCheck
+
+#############################################
+# Utility command for NightlyMemCheck
+
+build NightlyMemCheck: phony CMakeFiles/NightlyMemCheck
+
+#############################################
+# Utility command for ExperimentalSubmit
+
+build ExperimentalSubmit: phony CMakeFiles/ExperimentalSubmit
+# =============================================================================
+# Object build statements for EXECUTABLE target smvp-toolkit-gui
+
+
+#############################################
+# Order-only phony target for smvp-toolkit-gui
+
+build cmake_object_order_depends_target_smvp-toolkit-gui: phony || CMakeFiles/smvp-toolkit-gui.dir
+build CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o: C_COMPILER__smvp-toolkit-gui ../main-gui.c || cmake_object_order_depends_target_smvp-toolkit-gui
+  DEP_FILE = CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o.d
+  FLAGS = -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
+  INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
+  OBJECT_DIR = CMakeFiles/smvp-toolkit-gui.dir
+  OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-gui.dir
+
+# =============================================================================
+# Link build statements for EXECUTABLE target smvp-toolkit-gui
+
+
+#############################################
+# Link the executable smvp-toolkit-gui
+
+build smvp-toolkit-gui: C_EXECUTABLE_LINKER__smvp-toolkit-gui CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o
+  LINK_LIBRARIES = -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+  OBJECT_DIR = CMakeFiles/smvp-toolkit-gui.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = smvp-toolkit-gui
+  TARGET_PDB = smvp-toolkit-gui.dbg
+
+#############################################
+# Utility command for ContinuousConfigure
+
+build ContinuousConfigure: phony CMakeFiles/ContinuousConfigure
+
+#############################################
+# Utility command for ContinuousMemCheck
+
+build ContinuousMemCheck: phony CMakeFiles/ContinuousMemCheck
+
+#############################################
+# Utility command for ExperimentalConfigure
+
+build ExperimentalConfigure: phony CMakeFiles/ExperimentalConfigure
+
+#############################################
+# Utility command for ContinuousSubmit
+
+build ContinuousSubmit: phony CMakeFiles/ContinuousSubmit
+# =============================================================================
+# Object build statements for EXECUTABLE target smvp-toolkit-cli
+
+
+#############################################
+# Order-only phony target for smvp-toolkit-cli
+
+build cmake_object_order_depends_target_smvp-toolkit-cli: phony || CMakeFiles/smvp-toolkit-cli.dir
+build CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o: C_COMPILER__smvp-toolkit-cli ../main-cli.c || cmake_object_order_depends_target_smvp-toolkit-cli
+  DEP_FILE = CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o.d
+  FLAGS = -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
+  INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
+  OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
+  OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-cli.dir
+build CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o: C_COMPILER__smvp-toolkit-cli ../mmio/mmio.c || cmake_object_order_depends_target_smvp-toolkit-cli
+  DEP_FILE = CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o.d
+  FLAGS = -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
+  INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
+  OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
+  OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-cli.dir/mmio
+
+# =============================================================================
+# Link build statements for EXECUTABLE target smvp-toolkit-cli
+
+
+#############################################
+# Link the executable smvp-toolkit-cli
+
+build smvp-toolkit-cli: C_EXECUTABLE_LINKER__smvp-toolkit-cli CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o
+  OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = smvp-toolkit-cli
+  TARGET_PDB = smvp-toolkit-cli.dbg
+# =============================================================================
+# Object build statements for EXECUTABLE target mmio-writetest
+
+
+#############################################
+# Order-only phony target for mmio-writetest
+
+build cmake_object_order_depends_target_mmio-writetest: phony || CMakeFiles/mmio-writetest.dir
+build CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o: C_COMPILER__mmio-writetest ../mmio-writetest.c || cmake_object_order_depends_target_mmio-writetest
+  DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o.d
+  FLAGS = -pthread
+  INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
+  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
+  OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir
+build CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o: C_COMPILER__mmio-writetest ../mmio/mmio.c || cmake_object_order_depends_target_mmio-writetest
+  DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o.d
+  FLAGS = -pthread
+  INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
+  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
+  OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir/mmio
+
+# =============================================================================
+# Link build statements for EXECUTABLE target mmio-writetest
+
+
+#############################################
+# Link the executable mmio-writetest
+
+build mmio-writetest: C_EXECUTABLE_LINKER__mmio-writetest CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o
+  OBJECT_DIR = CMakeFiles/mmio-writetest.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = mmio-writetest
+  TARGET_PDB = mmio-writetest.dbg
+
+#############################################
+# Utility command for package
+
+build CMakeFiles/package.util: CUSTOM_COMMAND all
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/cpack --config ./CPackConfig.cmake
+  DESC = Run CPack packaging tool...
   pool = console
+  restat = 1
+build package: phony CMakeFiles/package.util
 
 #############################################
-# Custom command for CMakeFiles/ContinuousMemCheck
+# Utility command for test
 
-build CMakeFiles/ContinuousMemCheck: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousMemCheck
+build CMakeFiles/test.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest --force-new-ctest-process
+  DESC = Running tests...
   pool = console
+  restat = 1
+build test: phony CMakeFiles/test.util
 
 #############################################
-# Custom command for CMakeFiles/ContinuousConfigure
+# Custom command for CMakeFiles/ExperimentalBuild
 
-build CMakeFiles/ContinuousConfigure: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousConfigure
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ExperimentalSubmit
-
-build CMakeFiles/ExperimentalSubmit: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalSubmit
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ExperimentalMemCheck
-
-build CMakeFiles/ExperimentalMemCheck: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalMemCheck
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ExperimentalTest
-
-build CMakeFiles/ExperimentalTest: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalTest
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlyUpdate
-
-build CMakeFiles/NightlyUpdate: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyUpdate
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlyStart
-
-build CMakeFiles/NightlyStart: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyStart
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlyMemoryCheck
-
-build CMakeFiles/NightlyMemoryCheck: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyMemoryCheck
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlyBuild
-
-build CMakeFiles/NightlyBuild: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyBuild
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ExperimentalUpdate
-
-build CMakeFiles/ExperimentalUpdate: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalUpdate
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ContinuousBuild
-
-build CMakeFiles/ContinuousBuild: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousBuild
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/Continuous
-
-build CMakeFiles/Continuous: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D Continuous
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/Experimental
-
-build CMakeFiles/Experimental: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D Experimental
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ExperimentalConfigure
-
-build CMakeFiles/ExperimentalConfigure: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalConfigure
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlyTest
-
-build CMakeFiles/NightlyTest: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyTest
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlyCoverage
-
-build CMakeFiles/NightlyCoverage: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyCoverage
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ExperimentalCoverage
-
-build CMakeFiles/ExperimentalCoverage: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalCoverage
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlyMemCheck
-
-build CMakeFiles/NightlyMemCheck: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyMemCheck
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ContinuousStart
-
-build CMakeFiles/ContinuousStart: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousStart
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlySubmit
-
-build CMakeFiles/NightlySubmit: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlySubmit
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ContinuousCoverage
-
-build CMakeFiles/ContinuousCoverage: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousCoverage
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/Nightly
-
-build CMakeFiles/Nightly: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D Nightly
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/NightlyConfigure
-
-build CMakeFiles/NightlyConfigure: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyConfigure
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ExperimentalStart
-
-build CMakeFiles/ExperimentalStart: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalStart
-  pool = console
-
-#############################################
-# Custom command for CMakeFiles/ContinuousTest
-
-build CMakeFiles/ContinuousTest: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousTest
+build CMakeFiles/ExperimentalBuild: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalBuild
   pool = console
 
 #############################################
@@ -517,18 +365,283 @@ build CMakeFiles/ContinuousUpdate: CUSTOM_COMMAND
   pool = console
 
 #############################################
-# Custom command for CMakeFiles/ExperimentalBuild
+# Custom command for CMakeFiles/ExperimentalStart
 
-build CMakeFiles/ExperimentalBuild: CUSTOM_COMMAND
-  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalBuild
+build CMakeFiles/ExperimentalStart: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalStart
   pool = console
+
+#############################################
+# Custom command for CMakeFiles/Nightly
+
+build CMakeFiles/Nightly: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D Nightly
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ContinuousCoverage
+
+build CMakeFiles/ContinuousCoverage: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousCoverage
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ContinuousStart
+
+build CMakeFiles/ContinuousStart: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousStart
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ExperimentalCoverage
+
+build CMakeFiles/ExperimentalCoverage: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalCoverage
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlyConfigure
+
+build CMakeFiles/NightlyConfigure: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyConfigure
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlyCoverage
+
+build CMakeFiles/NightlyCoverage: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyCoverage
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlyTest
+
+build CMakeFiles/NightlyTest: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyTest
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/Experimental
+
+build CMakeFiles/Experimental: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D Experimental
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/Continuous
+
+build CMakeFiles/Continuous: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D Continuous
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ContinuousBuild
+
+build CMakeFiles/ContinuousBuild: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousBuild
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ExperimentalUpdate
+
+build CMakeFiles/ExperimentalUpdate: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalUpdate
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ContinuousTest
+
+build CMakeFiles/ContinuousTest: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousTest
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlySubmit
+
+build CMakeFiles/NightlySubmit: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlySubmit
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlyBuild
+
+build CMakeFiles/NightlyBuild: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyBuild
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlyMemoryCheck
+
+build CMakeFiles/NightlyMemoryCheck: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyMemoryCheck
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlyStart
+
+build CMakeFiles/NightlyStart: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyStart
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlyUpdate
+
+build CMakeFiles/NightlyUpdate: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyUpdate
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ExperimentalTest
+
+build CMakeFiles/ExperimentalTest: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalTest
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ExperimentalMemCheck
+
+build CMakeFiles/ExperimentalMemCheck: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalMemCheck
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/NightlyMemCheck
+
+build CMakeFiles/NightlyMemCheck: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D NightlyMemCheck
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ExperimentalSubmit
+
+build CMakeFiles/ExperimentalSubmit: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalSubmit
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ContinuousConfigure
+
+build CMakeFiles/ContinuousConfigure: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousConfigure
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ContinuousMemCheck
+
+build CMakeFiles/ContinuousMemCheck: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousMemCheck
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ExperimentalConfigure
+
+build CMakeFiles/ExperimentalConfigure: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ExperimentalConfigure
+  pool = console
+
+#############################################
+# Custom command for CMakeFiles/ContinuousSubmit
+
+build CMakeFiles/ContinuousSubmit: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/ctest -D ContinuousSubmit
+  pool = console
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# /home/cupchurch/git-repos/smvp-toolkit/CMakeLists.txt
+# =============================================================================
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build mmio/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build/mmio && /usr/bin/cmake -S/home/cupchurch/git-repos/smvp-toolkit -B/home/cupchurch/git-repos/smvp-toolkit/build
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+build mmio/rebuild_cache: phony mmio/CMakeFiles/rebuild_cache.util
+
+#############################################
+# Utility command for edit_cache
+
+build mmio/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build/mmio && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  DESC = No interactive CMake dialog available...
+  restat = 1
+build mmio/edit_cache: phony mmio/CMakeFiles/edit_cache.util
+
+#############################################
+# Utility command for test
+
+build mmio/CMakeFiles/test.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build/mmio && /usr/bin/ctest --force-new-ctest-process
+  DESC = Running tests...
+  pool = console
+  restat = 1
+build mmio/test: phony mmio/CMakeFiles/test.util
+# =============================================================================
+# Object build statements for STATIC_LIBRARY target mmio
+
+
+#############################################
+# Order-only phony target for mmio
+
+build cmake_object_order_depends_target_mmio: phony || mmio/CMakeFiles/mmio.dir
+build mmio/CMakeFiles/mmio.dir/mmio.c.o: C_COMPILER__mmio ../mmio/mmio.c || cmake_object_order_depends_target_mmio
+  DEP_FILE = mmio/CMakeFiles/mmio.dir/mmio.c.o.d
+  FLAGS = -pthread
+  INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
+  OBJECT_DIR = mmio/CMakeFiles/mmio.dir
+  OBJECT_FILE_DIR = mmio/CMakeFiles/mmio.dir
+
+# =============================================================================
+# Link build statements for STATIC_LIBRARY target mmio
+
+
+#############################################
+# Link the static library mmio/libmmio.a
+
+build mmio/libmmio.a: C_STATIC_LIBRARY_LINKER__mmio mmio/CMakeFiles/mmio.dir/mmio.c.o
+  OBJECT_DIR = mmio/CMakeFiles/mmio.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = mmio/libmmio.a
+  TARGET_PDB = mmio.a.dbg
+
+#############################################
+# Utility command for package_source
+
+build mmio/CMakeFiles/package_source.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/cpack --config ./CPackSourceConfig.cmake /home/cupchurch/git-repos/smvp-toolkit/build/CPackSourceConfig.cmake
+  DESC = Run CPack packaging tool for source...
+  pool = console
+  restat = 1
+build mmio/package_source: phony mmio/CMakeFiles/package_source.util
+
+#############################################
+# Utility command for package
+
+build mmio/CMakeFiles/package.util: CUSTOM_COMMAND mmio/all
+  COMMAND = cd /home/cupchurch/git-repos/smvp-toolkit/build && /usr/bin/cpack --config ./CPackConfig.cmake
+  DESC = Run CPack packaging tool...
+  pool = console
+  restat = 1
+build mmio/package: phony mmio/CMakeFiles/package.util
 # =============================================================================
 # Target aliases.
 
+build libmmio.a: phony mmio/libmmio.a
+build mmio: phony mmio/libmmio.a
 # =============================================================================
 # Folder targets.
 
 # =============================================================================
+# =============================================================================
+
+#############################################
+# Folder: /home/cupchurch/git-repos/smvp-toolkit/build/mmio
+
+build  mmio/all: phony mmio
 # =============================================================================
 # Unknown Build Time Dependencies.
 # Tell Ninja that they may appear as side effects of build rules
@@ -541,7 +654,7 @@ build CMakeFiles/ExperimentalBuild: CUSTOM_COMMAND
 #############################################
 # The main all target.
 
-build all: phony mmio-writetest smvp-toolkit mmio-readtest
+build all: phony mmio-readtest smvp-toolkit-gui smvp-toolkit-cli mmio-writetest mmio/libmmio.a
 
 #############################################
 # Make the all target the default.
@@ -551,13 +664,13 @@ default all
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | ../CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../mmio/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.13/Modules/FindPackageMessage.cmake /usr/share/cmake-3.13/Modules/FindPkgConfig.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake
   pool = console
 
 #############################################
 # A missing CMake input file is not an error.
 
-build ../CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake: phony
+build ../CMakeLists.txt ../mmio/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.13/Modules/FindPackageMessage.cmake /usr/share/cmake-3.13/Modules/FindPkgConfig.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake: phony
 
 #############################################
 # Clean all the built files.

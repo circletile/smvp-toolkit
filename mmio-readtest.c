@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "mmio.h"
+#include "mmio/mmio.h"
 
 int main(int argc, char *argv[])
 {
