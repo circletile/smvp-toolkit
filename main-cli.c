@@ -9,12 +9,10 @@
 #define REVISION_VER 0
 #define SMVP_CSR_DEBUG 0
 
-#define _POSIX_C_SOURCE 200809L // Required to utilize HPET for execution time calculations (via CLOCK_MONOTONIC)
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include "mmio/mmio.h"
+#include "smvp-algs/smvp-algs.h"
 
 // ANSI terminal color escape codes for making output BEAUTIFUL
 #define ANSI_COLOR_RED "\x1b[31m"
@@ -33,44 +31,6 @@ typedef struct _mm_raw_data_
     int col;
     double val;
 } MMRawData;
-
-// Struct: _csr_data_
-// Provides a convenient structure for storing/manipulating CSR compressed data
-typedef struct _csr_data_
-{
-    int *row_ptr;
-    int *col_ind;
-    double *val;
-} CSRData;
-
-// Function: vectorInit
-// Reinitializes vectors between calculation iterations
-void vectorInit(int vectorLen, double *outputVector, double val)
-{
-    for (int index = 0; index < vectorLen; index++)
-    {
-        outputVector[index] = val;
-    }
-}
-
-// Function: mmrd_comparitor
-// Provides a comparitor function that matches the format expected by stdlib qsort()
-// Sorts data by row, then by column
-int mmrd_comparator(const void *v1, const void *v2)
-{
-    const MMRawData *p1 = (MMRawData *)v1;
-    const MMRawData *p2 = (MMRawData *)v2;
-    if (p1->row < p2->row)
-        return -1;
-    else if (p1->row > p2->row)
-        return +1;
-    else if (p1->col < p2->col)
-        return -1;
-    else if (p1->col > p2->col)
-        return +1;
-    else
-        return 0;
-}
 
 // Function: mmioErrorHandler
 // Provides a simple error handler for known error types (mmio.h)
@@ -104,16 +64,12 @@ int main(int argc, char *argv[])
     FILE *mmInputFile, *reportOutputFile;
     char *outputFileName, *inputFileName;
     MM_typecode matcode;
-    CSRData workingMatrix;
-    int mmio_rb_return, mmio_rs_return, index, j, compIter;
+    int mmio_rb_return, mmio_rs_return, index;
     int fInputRows, fInputCols, fInputNonZeros;
-    double *onesVector, *outputVector;
-    struct timespec tsCompStart, tsCompEnd;
-    double comp_time_taken;
     unsigned long outputFileTime;
 
 
-    printf(ANSI_COLOR_GREEN "\n[START]\tExecuting smvp-csr v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
+    printf(ANSI_COLOR_GREEN "\n[START]\tExecuting smvp-toolbox-cli v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
     // Validate user provided arguments, handle exceptions accordingly
     if (argc < 2)
@@ -184,64 +140,15 @@ int main(int argc, char *argv[])
 
     // Convert loaded data to CSR format
     printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CSR format.\n" ANSI_COLOR_RESET);
-    workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
-    workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
-    workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
-
-    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator); //MM format specs don't guarantee data is sorted for easy conversion to CSR...
-
-    for (index = 0; index < fInputNonZeros; index++)
-    {
-        workingMatrix.val[index] = mmImportData[index].val;
-        workingMatrix.col_ind[index] = mmImportData[index].col;
-
-        if (index == fInputNonZeros - 1)
-        {
-            workingMatrix.row_ptr[mmImportData[index].row + 1] = fInputNonZeros;
-        }
-        else if (mmImportData[index].row < mmImportData[(index + 1)].row)
-        {
-            workingMatrix.row_ptr[mmImportData[index].row + 1] = index + 1;
-        }
-        else if (index == 0)
-        {
-            workingMatrix.row_ptr[mmImportData[index].row] = 0;
-        }
-    }
-
-    // Prepare the "ones "vector and output vector
-    onesVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
-    vectorInit(fInputRows, onesVector, 1);
-    outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
-
     printf(ANSI_COLOR_CYAN "[DATA]\tVector operand in use:\n" ANSI_COLOR_RESET);
     printf("\tOnes vector with dimensions [%d, %d]\n", fInputRows, 1);
 
     printf(ANSI_COLOR_YELLOW "[INFO]\tComputing n=1000 sparse-vector multiplication iterations.\n" ANSI_COLOR_RESET);
 
-    // Set up logging of compute time
-    clock_gettime(CLOCK_MONOTONIC, &tsCompStart);
+//##############################
+// CSR WAS HERE
+//##############################
 
-    // Compute the sparse vector multiplication (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
-    for (compIter = 0; compIter < 1000; compIter++)
-    {
-        //Reset output vector contents between iterations
-        vectorInit(fInputRows, outputVector, 0);
-
-        for (index = 0; index < fInputRows; index++)
-        {
-            for (j = workingMatrix.row_ptr[index]; j < workingMatrix.row_ptr[index + 1]; j++)
-            {
-                outputVector[index] += workingMatrix.val[j] * onesVector[workingMatrix.col_ind[j]];
-            }
-        }
-    }
-
-    // Write compute time results to terminal
-    clock_gettime(CLOCK_MONOTONIC, &tsCompEnd);
-
-    comp_time_taken = (double)(tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
-    comp_time_taken = (comp_time_taken + (double)(tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
     printf(ANSI_COLOR_CYAN "[DATA]\tVector product computation time:\n" ANSI_COLOR_RESET);
     printf("\t%g seconds\n", comp_time_taken);
 
@@ -274,27 +181,6 @@ int main(int argc, char *argv[])
         {
             fprintf(reportOutputFile, "\n]\n\n");
         }
-    }
-
-    // Append debug info in output file if required
-    if (SMVP_CSR_DEBUG)
-    {
-        fprintf(reportOutputFile, "[DEBUG]\tCSR row_ptr:\n[");
-        for (index = 0; index < fInputRows + 1; index++)
-        {
-            fprintf(reportOutputFile, "%d\n", workingMatrix.row_ptr[index]);
-        }
-        fprintf(reportOutputFile, "]\n[DEBUG]\tCSR val:\n[");
-        for (index = 0; index < fInputNonZeros; index++)
-        {
-            fprintf(reportOutputFile, "%g\n", workingMatrix.val[index]);
-        }
-        fprintf(reportOutputFile, "]\n[DEBUG]\tCSR col_ind:\n[");
-        for (index = 0; index < fInputNonZeros; index++)
-        {
-            fprintf(reportOutputFile, "%d\n", workingMatrix.col_ind[index]);
-        }
-        fprintf(reportOutputFile, "]\n");
     }
 
     fclose(reportOutputFile);

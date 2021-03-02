@@ -18,9 +18,10 @@ ADD_DEFINITIONS(${GTK3_CFLAGS_OTHER})
 
 include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(mmio)
+add_subdirectory(smvp-algs)
 
 add_executable(smvp-toolkit-gui main-gui.c)
-add_executable(smvp-toolkit-cli main-cli.c mmio/mmio.c)
+add_executable(smvp-toolkit-cli main-cli.c mmio/mmio.c smvp-algs/smvp-algs.c)
 add_executable(mmio-readtest mmio-readtest.c mmio/mmio.c)
 add_executable(mmio-writetest mmio-writetest.c mmio/mmio.c)
 
