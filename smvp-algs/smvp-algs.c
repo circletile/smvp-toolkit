@@ -4,6 +4,7 @@
 *  ==================================================================
 */
 
+#include <stdlib.h>
 #include <time.h>
 
 // Struct: _csr_data_
@@ -14,6 +15,15 @@ typedef struct _csr_data_
     int *col_ind;
     double *val;
 } CSRData;
+
+// Struct: _mm_raw_data_
+// Provides a convenient structure for importing/exporting Matrix Market file contents
+typedef struct _mm_raw_data_
+{
+    int row;
+    int col;
+    double val;
+} MMRawData;
 
 // Function: vectorInit
 // Reinitializes vectors between calculation iterations
@@ -46,7 +56,7 @@ int mmrd_comparator(const void *v1, const void *v2)
 
 // Function: smvp_csr_compute
 // Calculates SMVP using CSR algorithm
-void smvp_csr_compute()
+void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros)
 {
 
     CSRData workingMatrix;
@@ -111,26 +121,25 @@ void smvp_csr_compute()
     // RETURN SOMETHING
 }
 
-void smvp_csr_debug()
+/*
+void smvp_csr_debug(FILE *reportOutputFile, int fInputRows)
 {
     // Append debug info in output file if required
-    if (SMVP_CSR_DEBUG)
+    fprintf(reportOutputFile, "[DEBUG]\tCSR row_ptr:\n[");
+    for (index = 0; index < fInputRows + 1; index++)
     {
-        fprintf(reportOutputFile, "[DEBUG]\tCSR row_ptr:\n[");
-        for (index = 0; index < fInputRows + 1; index++)
-        {
-            fprintf(reportOutputFile, "%d\n", workingMatrix.row_ptr[index]);
-        }
-        fprintf(reportOutputFile, "]\n[DEBUG]\tCSR val:\n[");
-        for (index = 0; index < fInputNonZeros; index++)
-        {
-            fprintf(reportOutputFile, "%g\n", workingMatrix.val[index]);
-        }
-        fprintf(reportOutputFile, "]\n[DEBUG]\tCSR col_ind:\n[");
-        for (index = 0; index < fInputNonZeros; index++)
-        {
-            fprintf(reportOutputFile, "%d\n", workingMatrix.col_ind[index]);
-        }
-        fprintf(reportOutputFile, "]\n");
+        fprintf(reportOutputFile, "%d\n", workingMatrix.row_ptr[index]);
     }
+    fprintf(reportOutputFile, "]\n[DEBUG]\tCSR val:\n[");
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        fprintf(reportOutputFile, "%g\n", workingMatrix.val[index]);
+    }
+    fprintf(reportOutputFile, "]\n[DEBUG]\tCSR col_ind:\n[");
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        fprintf(reportOutputFile, "%d\n", workingMatrix.col_ind[index]);
+    }
+    fprintf(reportOutputFile, "]\n");
 }
+*/

@@ -5,17 +5,18 @@
 */
 
 
-#ifndef SMVP_CSR
-#define SMVP_CSR
+#ifndef SMVP_ALGS_HDR
+#define SMVP_ALGS_HDR
 
 #define _POSIX_C_SOURCE 200809L // Required to utilize HPET for execution time calculations (via CLOCK_MONOTONIC)
 
-typedef struct _csr_data_ *_csr_data_pointer;
+typedef struct _csr_data_ * CSRData;
+typedef struct _mm_raw_data_ * MMRawData;
 
 void vectorInit(int vectorLen, double *outputVector, double val);
 int mmrd_comparator(const void *v1, const void *v2);
-void smvp_csr_compute();
-void smvp_csr_debug();
+void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros);
+//void smvp_csr_debug();
 
 
 #endif

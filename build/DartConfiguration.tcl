@@ -73,7 +73,7 @@ UpdateType: git
 
 # Compiler info
 Compiler: /usr/bin/g++-8
-CompilerVersion: 
+CompilerVersion: 8.3.0
 
 # Dynamic analysis (MemCheck)
 PurifyCommand: 

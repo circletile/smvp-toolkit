@@ -49,13 +49,13 @@ build ContinuousUpdate: phony CMakeFiles/ContinuousUpdate
 build cmake_object_order_depends_target_mmio-readtest: phony || CMakeFiles/mmio-readtest.dir
 build CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o: C_COMPILER__mmio-readtest ../mmio-readtest.c || cmake_object_order_depends_target_mmio-readtest
   DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o.d
-  FLAGS = -pthread
+  FLAGS = -g   -pthread
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = CMakeFiles/mmio-readtest.dir
   OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir
 build CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o: C_COMPILER__mmio-readtest ../mmio/mmio.c || cmake_object_order_depends_target_mmio-readtest
   DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o.d
-  FLAGS = -pthread
+  FLAGS = -g   -pthread
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = CMakeFiles/mmio-readtest.dir
   OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir/mmio
@@ -68,6 +68,8 @@ build CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o: C_COMPILER__mmio-readtest ../m
 # Link the executable mmio-readtest
 
 build mmio-readtest: C_EXECUTABLE_LINKER__mmio-readtest CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o
+  FLAGS = -g
+  LINK_FLAGS = -rdynamic
   OBJECT_DIR = CMakeFiles/mmio-readtest.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -222,7 +224,7 @@ build ExperimentalSubmit: phony CMakeFiles/ExperimentalSubmit
 build cmake_object_order_depends_target_smvp-toolkit-gui: phony || CMakeFiles/smvp-toolkit-gui.dir
 build CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o: C_COMPILER__smvp-toolkit-gui ../main-gui.c || cmake_object_order_depends_target_smvp-toolkit-gui
   DEP_FILE = CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o.d
-  FLAGS = -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
+  FLAGS = -g   -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = CMakeFiles/smvp-toolkit-gui.dir
   OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-gui.dir
@@ -235,6 +237,8 @@ build CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o: C_COMPILER__smvp-toolkit-gui
 # Link the executable smvp-toolkit-gui
 
 build smvp-toolkit-gui: C_EXECUTABLE_LINKER__smvp-toolkit-gui CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o
+  FLAGS = -g
+  LINK_FLAGS = -rdynamic
   LINK_LIBRARIES = -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0
   OBJECT_DIR = CMakeFiles/smvp-toolkit-gui.dir
   POST_BUILD = :
@@ -271,19 +275,19 @@ build ContinuousSubmit: phony CMakeFiles/ContinuousSubmit
 build cmake_object_order_depends_target_smvp-toolkit-cli: phony || CMakeFiles/smvp-toolkit-cli.dir
 build CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o: C_COMPILER__smvp-toolkit-cli ../main-cli.c || cmake_object_order_depends_target_smvp-toolkit-cli
   DEP_FILE = CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o.d
-  FLAGS = -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
+  FLAGS = -g   -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
   OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-cli.dir
 build CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o: C_COMPILER__smvp-toolkit-cli ../mmio/mmio.c || cmake_object_order_depends_target_smvp-toolkit-cli
   DEP_FILE = CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o.d
-  FLAGS = -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
+  FLAGS = -g   -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
   OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-cli.dir/mmio
 build CMakeFiles/smvp-toolkit-cli.dir/smvp-algs/smvp-algs.c.o: C_COMPILER__smvp-toolkit-cli ../smvp-algs/smvp-algs.c || cmake_object_order_depends_target_smvp-toolkit-cli
   DEP_FILE = CMakeFiles/smvp-toolkit-cli.dir/smvp-algs/smvp-algs.c.o.d
-  FLAGS = -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
+  FLAGS = -g   -pthread -Wall -Wextra -Wpedantic -Werror -Wconversion
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
   OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-cli.dir/smvp-algs
@@ -296,6 +300,8 @@ build CMakeFiles/smvp-toolkit-cli.dir/smvp-algs/smvp-algs.c.o: C_COMPILER__smvp-
 # Link the executable smvp-toolkit-cli
 
 build smvp-toolkit-cli: C_EXECUTABLE_LINKER__smvp-toolkit-cli CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o CMakeFiles/smvp-toolkit-cli.dir/smvp-algs/smvp-algs.c.o
+  FLAGS = -g
+  LINK_FLAGS = -rdynamic
   OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -311,13 +317,13 @@ build smvp-toolkit-cli: C_EXECUTABLE_LINKER__smvp-toolkit-cli CMakeFiles/smvp-to
 build cmake_object_order_depends_target_mmio-writetest: phony || CMakeFiles/mmio-writetest.dir
 build CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o: C_COMPILER__mmio-writetest ../mmio-writetest.c || cmake_object_order_depends_target_mmio-writetest
   DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o.d
-  FLAGS = -pthread
+  FLAGS = -g   -pthread
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = CMakeFiles/mmio-writetest.dir
   OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir
 build CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o: C_COMPILER__mmio-writetest ../mmio/mmio.c || cmake_object_order_depends_target_mmio-writetest
   DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o.d
-  FLAGS = -pthread
+  FLAGS = -g   -pthread
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = CMakeFiles/mmio-writetest.dir
   OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir/mmio
@@ -330,6 +336,8 @@ build CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o: C_COMPILER__mmio-writetest ..
 # Link the executable mmio-writetest
 
 build mmio-writetest: C_EXECUTABLE_LINKER__mmio-writetest CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o
+  FLAGS = -g
+  LINK_FLAGS = -rdynamic
   OBJECT_DIR = CMakeFiles/mmio-writetest.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -595,7 +603,7 @@ build mmio/test: phony mmio/CMakeFiles/test.util
 build cmake_object_order_depends_target_mmio: phony || mmio/CMakeFiles/mmio.dir
 build mmio/CMakeFiles/mmio.dir/mmio.c.o: C_COMPILER__mmio ../mmio/mmio.c || cmake_object_order_depends_target_mmio
   DEP_FILE = mmio/CMakeFiles/mmio.dir/mmio.c.o.d
-  FLAGS = -pthread
+  FLAGS = -g   -pthread
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = mmio/CMakeFiles/mmio.dir
   OBJECT_FILE_DIR = mmio/CMakeFiles/mmio.dir
@@ -608,6 +616,7 @@ build mmio/CMakeFiles/mmio.dir/mmio.c.o: C_COMPILER__mmio ../mmio/mmio.c || cmak
 # Link the static library mmio/libmmio.a
 
 build mmio/libmmio.a: C_STATIC_LIBRARY_LINKER__mmio mmio/CMakeFiles/mmio.dir/mmio.c.o
+  LANGUAGE_COMPILE_FLAGS = -g
   OBJECT_DIR = mmio/CMakeFiles/mmio.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -677,7 +686,7 @@ build smvp-algs/test: phony smvp-algs/CMakeFiles/test.util
 build cmake_object_order_depends_target_smvp-algs: phony || smvp-algs/CMakeFiles/smvp-algs.dir
 build smvp-algs/CMakeFiles/smvp-algs.dir/smvp-algs.c.o: C_COMPILER__smvp-algs ../smvp-algs/smvp-algs.c || cmake_object_order_depends_target_smvp-algs
   DEP_FILE = smvp-algs/CMakeFiles/smvp-algs.dir/smvp-algs.c.o.d
-  FLAGS = -pthread
+  FLAGS = -g   -pthread
   INCLUDES = -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/gio-unix-2.0 -I/usr/include/cairo -I/usr/include/libdrm -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/fribidi -I/usr/include/atk-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/uuid -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I../
   OBJECT_DIR = smvp-algs/CMakeFiles/smvp-algs.dir
   OBJECT_FILE_DIR = smvp-algs/CMakeFiles/smvp-algs.dir
@@ -690,6 +699,7 @@ build smvp-algs/CMakeFiles/smvp-algs.dir/smvp-algs.c.o: C_COMPILER__smvp-algs ..
 # Link the static library smvp-algs/libsmvp-algs.a
 
 build smvp-algs/libsmvp-algs.a: C_STATIC_LIBRARY_LINKER__smvp-algs smvp-algs/CMakeFiles/smvp-algs.dir/smvp-algs.c.o
+  LANGUAGE_COMPILE_FLAGS = -g
   OBJECT_DIR = smvp-algs/CMakeFiles/smvp-algs.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -760,13 +770,13 @@ default all
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../mmio/CMakeLists.txt ../smvp-algs/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.13/Modules/FindPackageMessage.cmake /usr/share/cmake-3.13/Modules/FindPkgConfig.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../mmio/CMakeLists.txt ../smvp-algs/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.13/Modules/FindPackageMessage.cmake /usr/share/cmake-3.13/Modules/FindPkgConfig.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake
   pool = console
 
 #############################################
 # A missing CMake input file is not an error.
 
-build ../CMakeLists.txt ../mmio/CMakeLists.txt ../smvp-algs/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.13/Modules/FindPackageMessage.cmake /usr/share/cmake-3.13/Modules/FindPkgConfig.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake: phony
+build ../CMakeLists.txt ../mmio/CMakeLists.txt ../smvp-algs/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake-3.13/Modules/FindPackageMessage.cmake /usr/share/cmake-3.13/Modules/FindPkgConfig.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake: phony
 
 #############################################
 # Clean all the built files.
