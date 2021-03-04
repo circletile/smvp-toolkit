@@ -14,6 +14,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <popt.h>
 #include "mmio/mmio.h"
 #include "smvp-algs/smvp-algs.h"
 
@@ -26,7 +27,8 @@
 #define ANSI_COLOR_CYAN "\x1b[36m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
-#define ALG_ALL 0
+#define ALG_ALL 255
+#define ALG_NONE 0
 #define ALG_CSR 1
 #define ALG_TJDS 2
 
@@ -64,6 +66,26 @@ void mmioErrorHandler(int retcode)
         exit(1);
     }
 }
+
+// Function: mmrd_comparitor
+// Provides a comparitor function that matches the format expected by stdlib qsort()
+// Sorts data by row, then by column
+int mmrd_comparator(const void *v1, const void *v2)
+{
+    const MMRawData *p1 = (MMRawData *)v1;
+    const MMRawData *p2 = (MMRawData *)v2;
+    if (p1->row < p2->row)
+        return -1;
+    else if (p1->row > p2->row)
+        return +1;
+    else if (p1->col < p2->col)
+        return -1;
+    else if (p1->col > p2->col)
+        return +1;
+    else
+        return 0;
+}
+
 /*
 // Function: generateReportFile
 // Generates a report file from calculation results
@@ -108,75 +130,75 @@ void generateReportFile()
     fclose(reportOutputFile);
 }
 */
-int main(int argc, char *argv[])
+
+int main(int argc, const char *argv[])
 {
 
     char *inputFileName;
+    char c;
     FILE *mmInputFile;
     MM_typecode matcode;
-    int mmio_rb_return, mmio_rs_return, index, alg_mode;
+    int mmio_rb_return, mmio_rs_return, index, alg_mode, calc_iter;
     int fInputRows, fInputCols, fInputNonZeros;
+    int *iteration_time;
+    double *output_vector;
 
     printf(ANSI_COLOR_GREEN "\n[START]\tExecuting smvp-toolbox-cli v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
-    // Validate user provided arguments, handle exceptions accordingly
-    if (argc < 2)
+    // Ust POPT library to handle command line arguments robustly
+    // POPT library and documentation available at https://github.com/devzero2000/POPT
+    struct _popt_field
     {
-        fprintf(stderr, ANSI_COLOR_YELLOW "[HELP]\tUsage\n\n\t%s [options] <path-to-martix-market-file>\n\n" ANSI_COLOR_RESET, argv[0]);
-        fprintf(stderr, ANSI_COLOR_YELLOW "Options\n" ANSI_COLOR_RESET);
-        fprintf(stderr, ANSI_COLOR_YELLOW "\t--all\t\t\t= Run all SMVP algorithms\n" ANSI_COLOR_RESET);
-        fprintf(stderr, ANSI_COLOR_YELLOW "\t-A <algorithm-name>\t\t= Run specified SMVP algorithm\n" ANSI_COLOR_RESET);
-        exit(1);
-    }
-    else
+        int iter;
+        char *file;
+        /* etc */
+    } popt_field;
+
+    struct poptOption optionsTable[] = {
+        {"all", 'a', POPT_ARG_NONE, NULL, 'a', "Enable all SMVP algorithms."},
+        {"csr", 'c', POPT_ARG_NONE, NULL, 'c', "Enable CSR SMVP algorithm."},
+        {"tjds", 't', POPT_ARG_NONE, NULL, 't', "Enable TJDS SMVP algorithm."},
+        {"iter", 'i', POPT_ARG_INT, &popt_field.iter, 'i', "Specify computation iterations."},
+        {"file", 'f', POPT_ARG_STRING, &popt_field.file, 'f', "Specify path to input matrix file."},
+        POPT_AUTOHELP
+            POPT_TABLEEND};
+
+    poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+    poptSetOtherOptionHelp(optCon, "[OPTIONS]");
+
+    // Start with no algorithms selected, enable specific algs as oprions are processed.
+    alg_mode = ALG_NONE;
+
+    while ((c = poptGetNextOpt(optCon)) >= 0)
     {
-        if (argv[1][0] != '-')
+        switch (c)
         {
-            printf(ANSI_COLOR_RED "[ERROR]\tFirst argument must specify algorithms using --all or -a <algorithm-name>.\n" ANSI_COLOR_RESET);
+        case 'a':
+            alg_mode = ALG_ALL;
+            break;
+        case 'c':
+            alg_mode += ALG_CSR;
+            break;
+        case 't':
+            alg_mode += ALG_TJDS;
+            break;
+        case 'i':
+            calc_iter = popt_field.iter;
+            break;
+        case 'f':
+            if ((mmInputFile = fopen(popt_field.file, "r")) == NULL)
+            {
+                printf(ANSI_COLOR_RED "[ERROR]\tSpecified input file not found." ANSI_COLOR_RESET);
+                exit(1);
+            }
+            else
+            {
+                inputFileName = popt_field.file;
+            }
+            break;
+        default:
+            poptPrintUsage(optCon, stderr, 0);
             exit(1);
-        }
-        else
-        {
-
-            for (index = 0; argv[1][index]; index++)
-            {
-                argv[1][index] = (char)tolower(argv[1][index]);
-            }
-
-            if (strcmp(argv[1], "-all") == 0)
-            {
-                alg_mode = ALG_ALL;
-            }
-            else if (strcmp(argv[1], "-a") == 0)
-            {
-                for (index = 0; argv[2][index]; index++)
-                {
-                    argv[2][index] = (char)tolower(argv[2][index]);
-                }
-                if (strcmp(argv[2], "csr") == 0)
-                {
-                    alg_mode = ALG_CSR;
-                }
-                else if (strcmp(argv[2], "tjds") == 0)
-                {
-                    alg_mode = ALG_TJDS;
-                }
-                else
-                {
-                    printf(ANSI_COLOR_RED "[ERROR]\tInvalid algorithm specified.\n\tValid options in this version are CSR and TJDS." ANSI_COLOR_RESET);
-                    exit(1);
-                }
-            }
-        }
-
-        if ((mmInputFile = fopen(argv[3], "r")) == NULL)
-        {
-            printf(ANSI_COLOR_RED "[ERROR]\tSpecified input file not found." ANSI_COLOR_RESET);
-            exit(1);
-        }
-        else
-        {
-            inputFileName = argv[1];
         }
     }
 
@@ -220,7 +242,10 @@ int main(int argc, char *argv[])
         mmImportData[index].col--;
     }
 
-    // The Matrix Market library sample runs this check, I assume its for closing the file only if it isn't somehow mapped as keyboard input
+    // Sort imported data now to simplify future data processing
+    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator);
+
+    // Close input file only if it isn't somehow mapped as keyboard input
     if (mmInputFile != stdin)
     {
         fclose(mmInputFile);

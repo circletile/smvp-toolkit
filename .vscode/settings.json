@@ -3,5 +3,7 @@
         "*.tcc": "c",
         "cstdlib": "c",
         "memory": "c"
-    }
+    },
+    "C_Cpp.default.cStandard": "c99",
+    "C_Cpp.default.cppStandard": "c++11"
 }

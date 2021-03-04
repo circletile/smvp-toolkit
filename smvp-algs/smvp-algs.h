@@ -11,7 +11,6 @@
 #define _POSIX_C_SOURCE 200809L // Required to utilize HPET for execution time calculations (via CLOCK_MONOTONIC)
 
 typedef struct _csr_data_ * CSRData;
-typedef struct _mm_raw_data_ * MMRawData;
 
 void vectorInit(int vectorLen, double *outputVector, double val);
 int mmrd_comparator(const void *v1, const void *v2);

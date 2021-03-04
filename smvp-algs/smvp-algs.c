@@ -16,15 +16,6 @@ typedef struct _csr_data_
     double *val;
 } CSRData;
 
-// Struct: _mm_raw_data_
-// Provides a convenient structure for importing/exporting Matrix Market file contents
-typedef struct _mm_raw_data_
-{
-    int row;
-    int col;
-    double val;
-} MMRawData;
-
 // Function: vectorInit
 // Reinitializes vectors between calculation iterations
 void vectorInit(int vectorLen, double *outputVector, double val)
@@ -33,25 +24,6 @@ void vectorInit(int vectorLen, double *outputVector, double val)
     {
         outputVector[index] = val;
     }
-}
-
-// Function: mmrd_comparitor
-// Provides a comparitor function that matches the format expected by stdlib qsort()
-// Sorts data by row, then by column
-int mmrd_comparator(const void *v1, const void *v2)
-{
-    const MMRawData *p1 = (MMRawData *)v1;
-    const MMRawData *p2 = (MMRawData *)v2;
-    if (p1->row < p2->row)
-        return -1;
-    else if (p1->row > p2->row)
-        return +1;
-    else if (p1->col < p2->col)
-        return -1;
-    else if (p1->col > p2->col)
-        return +1;
-    else
-        return 0;
 }
 
 // Function: smvp_csr_compute
@@ -68,8 +40,6 @@ void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
     workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
-
-    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator); //MM format specs don't guarantee data is sorted for easy conversion to CSR...
 
     for (index = 0; index < fInputNonZeros; index++)
     {

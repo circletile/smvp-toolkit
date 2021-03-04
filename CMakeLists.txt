@@ -28,8 +28,8 @@ add_executable(mmio-writetest mmio-writetest.c mmio/mmio.c)
 # Link the target to the GTK+ libraries
 TARGET_LINK_LIBRARIES(smvp-toolkit-gui ${GTK3_LIBRARIES})
 
-target_compile_options(smvp-toolkit-gui PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
-target_compile_options(smvp-toolkit-cli PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
+#target_compile_options(smvp-toolkit-gui PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
+#target_compile_options(smvp-toolkit-cli PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

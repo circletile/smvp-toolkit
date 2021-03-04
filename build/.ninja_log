@@ -88,3 +88,10 @@
 1	34	1614748122	CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o	59f079478ba15d82
 1	37	1614748122	mmio/CMakeFiles/mmio.dir/mmio.c.o	d943d095e1c6cbf1
 0	241	1614748122	CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o	b17e7aa238b21961
+2	11	1614815838	mmio/libmmio.a	84f409a0581f6b24
+1	16	1614815838	mmio-writetest	929814c792169e2c
+1	16	1614815838	mmio-readtest	40d4a01321b9f588
+1	76	1614815838	smvp-toolkit-gui	5c8a9ade5306d5a9
+1	39	1614820502	CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o	564e7fbd4ec4b2b7
+0	241	1614820503	CMakeFiles/smvp-toolkit-gui.dir/main-gui.c.o	149d91f1c52e9427
+1	45	1614820533	smvp-toolkit-gui	5c8a9ade5306d5a9
