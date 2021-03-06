@@ -13,7 +13,7 @@ PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)
 INCLUDE_DIRECTORIES(${GTK3_INCLUDE_DIRS})
 LINK_DIRECTORIES(${GTK3_LIBRARY_DIRS})
 
-# Add other flags to the compiler
+# Add other GTK+ flags to the compiler
 ADD_DEFINITIONS(${GTK3_CFLAGS_OTHER})
 
 include_directories(${PROJECT_SOURCE_DIR})
@@ -24,11 +24,11 @@ add_executable(smvp-toolkit-cli main-cli.c mmio/mmio.c)
 add_executable(mmio-readtest mmio-readtest.c mmio/mmio.c)
 add_executable(mmio-writetest mmio-writetest.c mmio/mmio.c)
 
-# Link the target to the GTK+ libraries
+TARGET_LINK_LIBRARIES(smvp-toolkit-cli popt)
 TARGET_LINK_LIBRARIES(smvp-toolkit-gui ${GTK3_LIBRARIES})
 
-target_compile_options(smvp-toolkit-gui PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
-target_compile_options(smvp-toolkit-cli PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
+#target_compile_options(smvp-toolkit-gui PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
+#target_compile_options(smvp-toolkit-cli PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
