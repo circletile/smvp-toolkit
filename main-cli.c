@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
@@ -237,13 +238,39 @@ void smvp_csr_debug(FILE *reportOutputFile, int fInputRows)
 }
 */
 
+// Function: popt_usage
+// Displays syntax recommendations to the user when incorrrect arguments are passed to popt
+void popt_usage(poptContext optCon, int exitcode, char *error, char *addl)
+{
+    poptPrintUsage(optCon, stderr, 0);
+    if (error)
+        fprintf(stderr, "%s: %s", error, addl);
+    exit(exitcode);
+}
+
+int checkFolderExists(char *path)
+{
+    // Use POSIX stat() to retreive output folder properties
+    struct stat folderStats;
+    stat(path, &folderStats);
+
+    if (S_ISDIR(folderStats.st_mode))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 int main(int argc, const char *argv[])
 {
 
-    char *inputFileName;
+    const char *inputFileName;
+    char *reportPath;
     char c;
     FILE *mmInputFile;
     MM_typecode matcode;
+    poptContext optCon;
     int mmio_rb_return, mmio_rs_return, index, alg_mode, calc_iter;
     int fInputRows, fInputCols, fInputNonZeros;
     int *iteration_time;
@@ -254,25 +281,36 @@ int main(int argc, const char *argv[])
     struct _popt_field
     {
         int iter;
-        char *file;
+        char *outputFolder;
 
     } popt_field;
 
     struct poptOption optionsTable[] = {
-        {"all", 'a', POPT_ARG_NONE, NULL, 'a', "Enable all SMVP algorithms."},
-        {"csr", 'c', POPT_ARG_NONE, NULL, 'c', "Enable CSR SMVP algorithm."},
-        {"tjds", 't', POPT_ARG_NONE, NULL, 't', "Enable TJDS SMVP algorithm."},
-        {"iter", 'i', POPT_ARG_INT | POPT_ARGFLAG_OPTIONAL, &popt_field.iter, 'i', "Specify computation iterations."},
-        {"file", 'f', POPT_ARG_STRING, &popt_field.file, 'f', "Specify path to input matrix file."},
+        {"all-algs", 'a', POPT_ARG_NONE, NULL, 'a', "Enable all SMVP algorithms.", NULL},
+        {"csr", 'c', POPT_ARG_NONE, NULL, 'c', "Enable CSR SMVP algorithm.", NULL},
+        {"tjds", 't', POPT_ARG_NONE, NULL, 't', "Enable TJDS SMVP algorithm.", NULL},
+        {"number", 'n', POPT_ARG_INT, &popt_field.iter, 'n', "Number of computation iterations per-algorithm.", "1000"},
+        {"output", 'o', POPT_ARG_STRING, &popt_field.outputFolder, 'o', "Output folder for reports.", "./"},
         POPT_AUTOHELP
             POPT_TABLEEND};
 
-    poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
-    poptSetOtherOptionHelp(optCon, "[OPTIONS]");
+    optCon = poptGetContext(NULL, argc, argv, optionsTable, POPT_CONTEXT_NO_EXEC | POPT_CONTEXT_POSIXMEHARDER);
+    poptSetOtherOptionHelp(optCon, "[OPTIONS] <file>");
 
-    // Start with no algorithms selected, enable specific algs as oprions are processed.
+    // Start with no algorithms selected, enable specific algs as options are processed.
     alg_mode = ALG_NONE;
 
+    // Define default algorithm iteration count
+    calc_iter = 1000;
+
+    // Display usage if no arguments are specified
+    if (argc < 2)
+    {
+        poptPrintUsage(optCon, stderr, 0);
+        exit(1);
+    }
+
+    // Parse non-mandatory options
     while ((c = poptGetNextOpt(optCon)) >= 0)
     {
         switch (c)
@@ -280,7 +318,7 @@ int main(int argc, const char *argv[])
         case 'a':
             if (alg_mode != ALG_NONE)
             {
-                printf(ANSI_COLOR_RED "[ERROR]\tCombining [-a|--all] with other algorithm flags is not supported." ANSI_COLOR_RESET);
+                printf(ANSI_COLOR_RED "[ERROR]\tCombining [-a|--all] with other algorithm flags is not supported.\n" ANSI_COLOR_RESET);
                 exit(1);
             }
             else
@@ -291,7 +329,7 @@ int main(int argc, const char *argv[])
         case 'c':
             if (alg_mode == ALG_ALL)
             {
-                printf(ANSI_COLOR_RED "[ERROR]\tCombining [-a|--all] with other algorithm flags is not supported." ANSI_COLOR_RESET);
+                printf(ANSI_COLOR_RED "[ERROR]\tCombining [-a|--all] with other algorithm flags is not supported.\n" ANSI_COLOR_RESET);
                 exit(1);
             }
             else
@@ -302,7 +340,7 @@ int main(int argc, const char *argv[])
         case 't':
             if (alg_mode == ALG_ALL)
             {
-                printf(ANSI_COLOR_RED "[ERROR]\tCombining [-a|--all] with other algorithm flags is not supported." ANSI_COLOR_RESET);
+                printf(ANSI_COLOR_RED "[ERROR]\tCombining [-a|--all] with other algorithm flags is not supported.\n" ANSI_COLOR_RESET);
                 exit(1);
             }
             else
@@ -310,26 +348,75 @@ int main(int argc, const char *argv[])
                 alg_mode += ALG_TJDS;
                 break;
             }
-        case 'i':
-            calc_iter = popt_field.iter;
-            break;
-        case 'f':
-            if ((mmInputFile = fopen(popt_field.file, "r")) == NULL)
+        case 'n':
+            if (popt_field.iter >= 1)
             {
-                printf(ANSI_COLOR_RED "[ERROR]\tSpecified input file not found." ANSI_COLOR_RESET);
-                exit(1);
+                calc_iter = popt_field.iter;
             }
             else
             {
-                inputFileName = popt_field.file;
+                printf(ANSI_COLOR_RED "[ERROR]\tInvalid number of algorithm iterations specified.\n" ANSI_COLOR_RESET);
+                exit(1);
             }
             break;
+        case 'o':
+            // Determine folder existance and act accordingly
+            if (checkFolderExists(popt_field.outputFolder))
+            {
+                reportPath = popt_field.outputFolder;
+                break;
+            }
+            else
+            {
+                printf(ANSI_COLOR_RED "[ERROR]\tReport output folder not found. Check path and/or create folder if it does not exist.\n" ANSI_COLOR_RESET);
+                exit(1);
+            }
         default:
             poptPrintUsage(optCon, stderr, 0);
             exit(1);
         }
     }
 
+    // Handle popt option exceptions where appropriate
+    if (c < -1)
+    {
+        switch (c)
+        {
+        case POPT_ERROR_NOARG:
+            printf(ANSI_COLOR_RED "[ERROR]\tOne or more options missing a required argument.\n" ANSI_COLOR_RESET);
+            exit(1);
+        case POPT_ERROR_NULLARG:
+            printf(ANSI_COLOR_RED "[ERROR]\tOne or more options missing a required argument.\n" ANSI_COLOR_RESET);
+            exit(1);
+        case POPT_ERROR_BADQUOTE:
+            printf(ANSI_COLOR_RED "[ERROR]\tQuotation mismatch in path. Ensure path is enclosed by only one pair of quotation marks.\n" ANSI_COLOR_RESET);
+            exit(1);
+        case POPT_ERROR_BADNUMBER:
+            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iterations [-i|--iter] contains non-number characters.\n" ANSI_COLOR_RESET);
+            exit(1);
+        case POPT_ERROR_OVERFLOW:
+            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iterations [-i|--iter] must be between 0 and approximately 1.8E19 (64-bit integer).\n" ANSI_COLOR_RESET);
+            exit(1);
+        default:
+            fprintf(stderr, "%s: %s\n", poptBadOption(optCon, POPT_BADOPTION_NOALIAS), poptStrerror(c));
+            exit(1);
+        }
+    }
+
+    // Parse mandatory arguments
+    inputFileName = poptGetArg(optCon);
+    if ((inputFileName == NULL) || !(poptPeekArg(optCon) == NULL))
+    {
+        popt_usage(optCon, 1, ANSI_COLOR_RED "[ERROR]\tMust specify a single input file", "ex., /path/to/file.mtx\n" ANSI_COLOR_RESET);
+    }
+    else if ((mmInputFile = fopen(inputFileName, "r")) == NULL)
+    {
+        printf(ANSI_COLOR_RED "[ERROR]\tSpecified input file not found.\n" ANSI_COLOR_RESET);
+        exit(1);
+    }
+
+    // Done parsing options/args, release popt context instance
+    poptFreeContext(optCon);
     printf(ANSI_COLOR_GREEN "\n[START]\tExecuting smvp-toolbox-cli v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
     // Ensure input file is of proper format and contains an appropriate matrix type
