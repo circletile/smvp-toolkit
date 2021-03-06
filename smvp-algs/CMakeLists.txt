@@ -1,1 +1,0 @@
-add_library(smvp-algs smvp-algs.c)
