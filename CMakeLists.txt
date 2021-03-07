@@ -24,7 +24,7 @@ add_executable(smvp-toolkit-cli main-cli.c mmio/mmio.c)
 add_executable(mmio-readtest mmio-readtest.c mmio/mmio.c)
 add_executable(mmio-writetest mmio-writetest.c mmio/mmio.c)
 
-TARGET_LINK_LIBRARIES(smvp-toolkit-cli popt)
+TARGET_LINK_LIBRARIES(smvp-toolkit-cli popt m)
 TARGET_LINK_LIBRARIES(smvp-toolkit-gui ${GTK3_LIBRARIES})
 
 #target_compile_options(smvp-toolkit-gui PUBLIC -Wall -Wextra -Wpedantic -Werror -Wconversion)
