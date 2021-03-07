@@ -52,6 +52,23 @@ typedef struct _csr_data_
     double *val;
 } CSRData;
 
+// Struct: _tjds_data_
+// Provides a convenient structure for storing/manipulating TJDS compressed data
+typedef struct _tjds_data_
+{
+    double *val;
+    int *row_ind;
+    int *start_pos;
+} TJDSData;
+
+// Struct: _transpose_table_
+// Provides a convenient structure for sorting TJDS compressed data
+typedef struct _transpose_table_
+{
+    int originCol;
+    int colLength;
+} TXTable;
+
 // Struct: _results_data_
 // Provides a convenient structure for storing/manipulating algorithm run results
 struct _time_data_
@@ -135,10 +152,10 @@ void mmioErrorHandler(int retcode)
     }
 }
 
-// Function: mmrd_comparitor
-// Provides a comparitor function that matches the format expected by stdlib qsort()
-// Sorts data by row, then by column
-int mmrd_comparator(const void *v1, const void *v2)
+// Function: mmrd_comparator_row_col
+// Provides a comparitor function for MMRawData structs that matches the format expected by stdlib qsort()
+// Sorts data by row (lowest = leftmost), then by column (lowest = leftmost)
+int mmrd_comparator_row_col(const void *v1, const void *v2)
 {
     const MMRawData *p1 = (MMRawData *)v1;
     const MMRawData *p2 = (MMRawData *)v2;
@@ -149,6 +166,44 @@ int mmrd_comparator(const void *v1, const void *v2)
     else if (p1->col < p2->col)
         return -1;
     else if (p1->col > p2->col)
+        return +1;
+    else
+        return 0;
+}
+
+// Function: mmrd_comparator_col_row
+// Provides a comparitor function for MMRawData structs that matches the format expected by stdlib qsort()
+// Sorts data by column (lowest = leftmost), then by row (lowest = leftmost)
+int mmrd_comparator_col_row(const void *v1, const void *v2)
+{
+    const MMRawData *p1 = (MMRawData *)v1;
+    const MMRawData *p2 = (MMRawData *)v2;
+    if (p1->col < p2->col)
+        return -1;
+    else if (p1->col > p2->col)
+        return +1;
+    else if (p1->row < p2->row)
+        return -1;
+    else if (p1->row > p2->row)
+        return +1;
+    else
+        return 0;
+}
+
+// Function: txtable_comparator_len
+// Provides a comparitor function for TXTable structs that matches the format expected by stdlib qsort()
+// Sorts data by colLength (highest = leftmost), then by originCol (lowest = leftmost)
+int txtable_comparator_len(const void *v1, const void *v2)
+{
+    const TXTable *p1 = (TXTable *)v1;
+    const TXTable *p2 = (TXTable *)v2;
+    if (p1->colLength > p2->colLength)
+        return -1;
+    else if (p1->colLength < p2->colLength)
+        return +1;
+    else if (p1->originCol < p2->originCol)
+        return -1;
+    else if (p1->originCol > p2->originCol)
         return +1;
     else
         return 0;
@@ -228,13 +283,14 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
     printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CSR format.\n" ANSI_COLOR_RESET);
 
     // Sort imported data now to simplify future data processing
-    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator);
+    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator_row_col);
 
     // Allocate memory for CSR storage
     workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
     workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
 
+    // Convert MatrixMarket format into CSR format
     for (index = 0; index < fInputNonZeros; index++)
     {
         workingMatrix.val[index] = mmImportData[index].val;
@@ -293,7 +349,7 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
     {
 
         // Capture compute run start time
-        clock_gettime(CLOCK_MONOTONIC, &time_run_start[i]);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_start[i]);
 
         //Reset output vector contents between iterations
         vectorInit(fInputRows, outputVector, 0);
@@ -307,7 +363,7 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
         }
 
         // Capture compute run end time
-        clock_gettime(CLOCK_MONOTONIC, &time_run_end[i]);
+        clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_end[i]);
     }
 
     //
@@ -356,6 +412,126 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
     }
 
     return outputVector;
+}
+
+// Function: smvp_tjds_compute
+// Calculates SMVP using TJDS algorithm
+// Returns results vector directly, time data via pointer
+double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputColumns, int fInputNonZeros, int compiter, struct _time_data_ *tjds_time)
+{
+
+    TJDSData workingMatrix;
+    MMRawData *mmCloneData;
+    TXTable *txList = (struct _transpose_table_ *)malloc(sizeof(struct _transpose_table_) * fInputColumns);
+    int index, txIter;
+    double *onesVector, *outputVector;
+    double comp_time_taken;
+    double *time_run = (double *)malloc(compiter * sizeof(double));
+    struct timespec *time_run_start = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
+    struct timespec *time_run_end = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
+
+    // Convert loaded data to TJDS format
+    printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to TJDS format.\n" ANSI_COLOR_RESET);
+
+    // Sort imported data now to simplify future data processing
+    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator_col_row);
+
+    // Allocate memory for TJDS storage
+    workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
+    workingMatrix.row_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
+    workingMatrix.start_pos = (int *)malloc(sizeof(int) * (long unsigned int)(mmImportData[fInputNonZeros - 1].row + 1));
+
+    // Prepare the "ones" vector and output vector
+    onesVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
+    vectorInit(fInputRows, onesVector, 1);
+    outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
+
+    /* Convert MatrixMarket format into TJDS format */
+
+    // 1. Allocate a "clone" import data object so we don't clobber the original data during compression (in case other algs will be called later)
+    mmCloneData = (MMRawData *)malloc(sizeof(MMRawData) * (long unsigned int)fInputNonZeros);
+
+    // 2. Compress import data vertically
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        // The column and value won't change just yet.
+        mmCloneData[index].col = mmImportData[index].col;
+        mmCloneData[index].val = mmImportData[index].val;
+
+        // If we're on the first NNZ...
+        if (index == 0)
+        {
+            // ...relocate the NNZ to the top of the column (row translate).
+            mmCloneData[index].row = 0;
+        }
+        // If we're past the first NNZ...
+        else
+        {
+            // ...and the column has changed between the current and previous NNZ...
+            if (mmImportData[index].col > mmImportData[index - 1].col)
+            {
+                // ...relocate the NNZ to the top of the column (row translate)...
+                mmCloneData[index].row = 0;
+
+                // ...document the column length and position of the previous column....
+                txList[mmCloneData[index - 1].col].colLength = mmCloneData[index - 1].row;
+                txList[mmCloneData[index - 1].col].originCol = mmCloneData[index - 1].col;
+            }
+            // ...and there's a row gap between the current and previous NNZ...
+            else if ((mmImportData[index].row - mmImportData[index - 1].row) > 1)
+            {
+                // ...relocate the NNZ to just below thw previous NNZ (row translate).
+                mmCloneData[index].row = (mmImportData[index - 1].row + 1);
+            }
+            // ...and there's no row gap between the current and previous NNZ (DEFAULT CASE ASSUMPTION)...
+            else
+            {
+                // ...do nothing to the row of the NNZ.
+                mmCloneData[index].row = mmImportData[index].row;
+            }
+
+            // ...and this is also the last NNZ...
+            if (index == fInputNonZeros - 1)
+            {
+                // ...document the column length and position of the this last column.
+                txList[mmCloneData[index].col].colLength = mmCloneData[index].row;
+                txList[mmCloneData[index].col].originCol = mmCloneData[index].col;
+            }
+        }
+    }
+
+    // 3. Generate reording vectors
+    qsort(txList, (size_t)fInputColumns, sizeof(TXTable), txtable_comparator_len);
+
+    // 4. Reorder import data and multiplication vector
+
+    //mmCloneData has row, col, val
+    //  reassigning by column
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        for (txIter = 0; txIter < fInputColumns; txIter++)
+        {
+            if (txList[txIter].originCol == mmCloneData[index].col)
+            {
+                mmCloneData[index].col = txIter;
+                break;
+            }
+        }
+    }
+
+    // onesVector has val
+    //  reassigning by position in array (key)
+    for (index = 0; index < fInputRows; index++)
+    {
+        for (txIter = 0; txIter < fInputColumns; txIter++)
+        {
+            if (txList[txIter].originCol == mmCloneData[index].col)
+            {
+                mmCloneData[index].col = txIter;
+                break;
+            }
+        }
+    }
 }
 
 // Function: smvp_csr_debug
@@ -634,7 +810,9 @@ int main(int argc, const char *argv[])
     if (alg_mode & ALG_TJDS)
     {
         // DO TJDS
-        printf(ANSI_COLOR_CYAN "[DEBUG]\tTJDS NOT YET IMPLEMENTED\n" ANSI_COLOR_RESET);
+        struct _time_data_ *tjds_time = newResultsData(tjds_time, calc_iter);
+        double *output_vector_tjds = smvp_tjds_compute(mmImportData, fInputRows, fInputCols, fInputNonZeros, calc_iter, tjds_time);
+        generateReportText(inputFileName, ALG_TJDS, fInputNonZeros, fInputRows, calc_iter, output_vector_tjds, tjds_time);
     }
 
     printf(ANSI_COLOR_GREEN "[STOP]\tExit smvp-csr v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);

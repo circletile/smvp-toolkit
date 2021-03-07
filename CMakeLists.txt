@@ -19,6 +19,9 @@ enable_testing()
 include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(mmio)
 
+# Add compile definition _XOPEN_SOURCE in order to use HPET via CLOCK_MONOTONIC_RAW
+add_compile_definitions(_XOPEN_SOURCE=700)
+
 #add_executable(smvp-toolkit-gui main-gui.c)
 add_executable(smvp-toolkit-cli main-cli.c mmio/mmio.c)
 add_executable(mmio-readtest mmio-readtest.c mmio/mmio.c)
