@@ -29,8 +29,8 @@
 
 #define ALG_ALL 255
 #define ALG_NONE 0
-#define ALG_CSR 1
-#define ALG_TJDS 2
+#define ALG_CSR (1 << 1)
+#define ALG_TJDS (1 << 2)
 
 // Struct: _mm_raw_data_
 // Provides a convenient structure for importing/exporting Matrix Market file contents
@@ -49,6 +49,31 @@ typedef struct _csr_data_
     int *col_ind;
     double *val;
 } CSRData;
+
+// Struct: _results_data_
+// Provides a convenient structure for storing/manipulating algorithm run results
+struct _time_data_
+{
+    double time_total;
+    double time_avg;
+    double time_each[];
+};
+
+struct _time_data_ *newResultsData(struct _time_data_ *t, int num_runs, double t_ea[])
+{
+    double t_tot = 0;
+
+    t = (struct _time_data_ *)malloc( sizeof(*t) + sizeof(double) * num_runs);
+    for( int i = 0; i < num_runs; i++)
+    {
+        t->time_each[i] = t_ea[i];
+        t_tot += t_ea[i];
+    }
+    t->time_total = t_tot;
+    t->time_avg = t_tot / num_runs;
+
+    return t;
+}
 
 // Function: vectorInit
 // Reinitializes vectors between calculation iterations
@@ -152,15 +177,24 @@ void generateReportFile()
 
 // Function: smvp_csr_compute
 // Calculates SMVP using CSR algorithm
-void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros)
+// Returns results vector directly, time data via pointer
+int *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros, int compiter, struct _time_data_ *tData)
 {
 
     CSRData workingMatrix;
     double *onesVector, *outputVector;
     struct timespec tsCompStart, tsCompEnd;
     double comp_time_taken;
-    int j, compIter, index;
+    int i, j, index;
+    struct timespec *time_run = (int *)malloc(sizeof(struct timespec) * compiter);
 
+    // Convert loaded data to CSR format
+    printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CSR format.\n" ANSI_COLOR_RESET);
+
+    // Sort imported data now to simplify future data processing
+    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator);
+
+    // Allocate memory for CSR storage
     workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
     workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
@@ -189,11 +223,18 @@ void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     vectorInit(fInputRows, onesVector, 1);
     outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
 
+    printf(ANSI_COLOR_YELLOW "[INFO]\tCalculating %d iterations of SMVP CSR.\n" ANSI_COLOR_RESET, compiter);
+
+    //
+    // ATOMIC SECTION START
+    // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
+    //
+
     // Capture compute start time
     clock_gettime(CLOCK_MONOTONIC, &tsCompStart);
 
     // Compute the sparse vector multiplication (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
-    for (compIter = 0; compIter < 1000; compIter++)
+    for (i = 0; i < compiter; i++)
     {
         //Reset output vector contents between iterations
         vectorInit(fInputRows, outputVector, 0);
@@ -205,14 +246,25 @@ void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
                 outputVector[index] += workingMatrix.val[j] * onesVector[workingMatrix.col_ind[j]];
             }
         }
+
+        clock_gettime(CLOCK_MONOTONIC, &time_run[i])
     }
 
     // Capture compute end time & derive elapsed time
     clock_gettime(CLOCK_MONOTONIC, &tsCompEnd);
+
+    //
+    // ATOMIC SECTION END
+    // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
+    //
+
+    // Calculate time taken to perform calculations
     comp_time_taken = (double)(tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
     comp_time_taken = (comp_time_taken + (double)(tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
 
-    // RETURN SOMETHING
+    struct _time_data_ *csr_time = newResultsData(*csr_time, compiter, )
+
+    return;
 }
 
 /*
@@ -415,7 +467,7 @@ int main(int argc, const char *argv[])
         exit(1);
     }
 
-    // Done parsing options/args, release popt context instance
+    // Done parsing options/args, release popt instance
     poptFreeContext(optCon);
     printf(ANSI_COLOR_GREEN "\n[START]\tExecuting smvp-toolbox-cli v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
@@ -459,9 +511,6 @@ int main(int argc, const char *argv[])
         mmImportData[index].col--;
     }
 
-    // Sort imported data now to simplify future data processing
-    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator);
-
     // Close input file only if it isn't somehow mapped as keyboard input
     if (mmInputFile != stdin)
     {
@@ -471,24 +520,18 @@ int main(int argc, const char *argv[])
     printf(ANSI_COLOR_CYAN "[DATA]\tNon-zero numbers contained in matrix:\n" ANSI_COLOR_RESET);
     printf("\t%d\n", fInputNonZeros);
 
-    // Convert loaded data to CSR format
-    printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CSR format.\n" ANSI_COLOR_RESET);
     printf(ANSI_COLOR_CYAN "[DATA]\tVector operand in use:\n" ANSI_COLOR_RESET);
     printf("\tOnes vector with dimensions [%d, %d]\n", fInputRows, 1);
 
-    printf(ANSI_COLOR_YELLOW "[INFO]\tComputing n=1000 sparse-vector multiplication iterations.\n" ANSI_COLOR_RESET);
-
-    if (alg_mode == ALG_CSR)
+    // Run each algorithm selected by user
+    if (alg_mode & ALG_CSR)
     {
-        //DO CSR
+        // DO CSR
+        smvp_csr_compute(mmImportData, fInputRows, fInputNonZeros, calc_iter);
     }
-    else if (alg_mode == ALG_TJDS)
+    if (alg_mode & ALG_TJDS)
     {
-        //DO TJDS
-    }
-    else if (alg_mode == ALG_ALL)
-    {
-        //DO ALL
+        // DO TJDS
     }
 
     /*
