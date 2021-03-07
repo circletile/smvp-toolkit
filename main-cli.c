@@ -59,12 +59,12 @@ struct _time_data_
     double time_each[];
 };
 
-struct _time_data_ *newResultsData(struct _time_data_ *t, int num_runs, double t_ea[])
+struct _time_data_ *newResultsData(struct _time_data_ *t, int num_runs, double *t_ea)
 {
     double t_tot = 0;
 
-    t = (struct _time_data_ *)malloc( sizeof(*t) + sizeof(double) * num_runs);
-    for( int i = 0; i < num_runs; i++)
+    t = (struct _time_data_ *)malloc(sizeof(*t) + sizeof(double) * num_runs);
+    for (int i = 0; i < num_runs; i++)
     {
         t->time_each[i] = t_ea[i];
         t_tot += t_ea[i];
@@ -178,7 +178,7 @@ void generateReportFile()
 // Function: smvp_csr_compute
 // Calculates SMVP using CSR algorithm
 // Returns results vector directly, time data via pointer
-int *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros, int compiter, struct _time_data_ *tData)
+double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros, int compiter, struct _time_data_ *tData)
 {
 
     CSRData workingMatrix;
@@ -186,7 +186,9 @@ int *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     struct timespec tsCompStart, tsCompEnd;
     double comp_time_taken;
     int i, j, index;
-    struct timespec *time_run = (int *)malloc(sizeof(struct timespec) * compiter);
+    double *time_run = (double *)malloc(sizeof(double) * compiter);
+    struct timespec *time_run_start = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
+    struct timespec *time_run_end = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
 
     // Convert loaded data to CSR format
     printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CSR format.\n" ANSI_COLOR_RESET);
@@ -236,6 +238,10 @@ int *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     // Compute the sparse vector multiplication (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
     for (i = 0; i < compiter; i++)
     {
+
+        // Capture compute run start time
+        clock_gettime(CLOCK_MONOTONIC, &time_run_start[i]);
+
         //Reset output vector contents between iterations
         vectorInit(fInputRows, outputVector, 0);
 
@@ -247,10 +253,11 @@ int *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
             }
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &time_run[i])
+        // Capture compute run end time
+        clock_gettime(CLOCK_MONOTONIC, &time_run_end[i]);
     }
 
-    // Capture compute end time & derive elapsed time
+    // Capture compute final end time
     clock_gettime(CLOCK_MONOTONIC, &tsCompEnd);
 
     //
@@ -262,9 +269,15 @@ int *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     comp_time_taken = (double)(tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
     comp_time_taken = (comp_time_taken + (double)(tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
 
-    struct _time_data_ *csr_time = newResultsData(*csr_time, compiter, )
+    for (i = 0; i < compiter; i++)
+    {
+        time_run[i] = (double)(time_run_end[i].tv_sec - time_run_start[i].tv_sec) * 1e9;
+        time_run[i] = (comp_time_taken + (double)(time_run_end[i].tv_nsec - time_run_start[i].tv_nsec)) * 1e-9;
+    }
 
-    return;
+    struct _time_data_ *csr_time = newResultsData(csr_time, compiter, time_run);
+
+    return outputVector;
 }
 
 /*
@@ -527,7 +540,8 @@ int main(int argc, const char *argv[])
     if (alg_mode & ALG_CSR)
     {
         // DO CSR
-        smvp_csr_compute(mmImportData, fInputRows, fInputNonZeros, calc_iter);
+        struct _time_data_ *csr_time;
+        int *output_vector_csr = smvp_csr_compute(mmImportData, fInputRows, fInputNonZeros, calc_iter, csr_time);
     }
     if (alg_mode & ALG_TJDS)
     {
