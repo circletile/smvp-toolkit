@@ -423,8 +423,8 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     TJDSData workingMatrix;
     MMRawData *mmCloneData;
     TXTable *txList = (struct _transpose_table_ *)malloc(sizeof(struct _transpose_table_) * fInputColumns);
-    int index, txIter;
-    double *onesVector, *outputVector;
+    int index, txIter, i;
+    double *onesVector, *outputVector, *onesVectorTemp;
     double comp_time_taken;
     double *time_run = (double *)malloc(compiter * sizeof(double));
     struct timespec *time_run_start = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
@@ -503,10 +503,7 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     // 3. Generate reording vectors
     qsort(txList, (size_t)fInputColumns, sizeof(TXTable), txtable_comparator_len);
 
-    // 4. Reorder import data and multiplication vector
-
-    //mmCloneData has row, col, val
-    //  reassigning by column
+    // 4. Reassign import data column assignments using reordering vectors
     for (index = 0; index < fInputNonZeros; index++)
     {
         for (txIter = 0; txIter < fInputColumns; txIter++)
@@ -519,19 +516,93 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         }
     }
 
-    // onesVector has val
-    //  reassigning by position in array (key)
+    // 5. Reassign multiplication vector rows by using reordering vectoes
+    onesVectorTemp = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
     for (index = 0; index < fInputRows; index++)
     {
         for (txIter = 0; txIter < fInputColumns; txIter++)
         {
-            if (txList[txIter].originCol == mmCloneData[index].col)
+            if (txList[txIter].originCol == index)
             {
-                mmCloneData[index].col = txIter;
+                onesVectorTemp[txIter] = onesVector[index];
                 break;
             }
         }
     }
+    for (index = 0; index < fInputRows; index++)
+    {
+        onesVector[index] = onesVectorTemp[index];
+    }
+    free(onesVectorTemp);
+
+
+    // 6. Import data into appropriate TJDS structures
+    for (index = 0; index < fInputNonZeros; index ++){
+        workingMatrix.val[index] = mmCloneData[index].val;
+    }
+    
+
+
+
+    printf(ANSI_COLOR_YELLOW "[INFO]\tCalculating %d iterations of SMVP TJDS.\n" ANSI_COLOR_RESET, compiter);
+
+    //
+    // ATOMIC SECTION START
+    // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
+    //
+
+    // Compute CSR SMVP (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
+    for (i = 0; i < compiter; i++)
+    {
+
+        // Capture compute run start time
+        clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_start[i]);
+
+        //Reset output vector contents between iterations
+        vectorInit(fInputRows, outputVector, 0);
+
+        /* DO TJDS VHERK HEER */
+
+        // Capture compute run end time
+        clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_end[i]);
+    }
+
+    //
+    // ATOMIC SECTION END
+    // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
+    //
+
+    // Convert all per-run timespec structs to time in seconds & populate time structure
+    for (i = 0; i < compiter; i++)
+    {
+        time_run[i] = (double)(time_run_end[i].tv_sec - time_run_start[i].tv_sec) * 1e9;
+        time_run[i] = (comp_time_taken + (double)(time_run_end[i].tv_nsec - time_run_start[i].tv_nsec)) * 1e-9;
+
+        tjds_time->time_each[i] = time_run[i];
+        tjds_time->time_total += time_run[i];
+        tjds_time->time_avg += time_run[i];
+
+        if (i == 0)
+        {
+            tjds_time->time_min = time_run[i];
+            tjds_time->time_max = time_run[i];
+        }
+        else
+        {
+            if (tjds_time->time_min > time_run[i])
+            {
+                tjds_time->time_min = time_run[i];
+            }
+            if (tjds_time->time_max < time_run[i])
+            {
+                tjds_time->time_max = time_run[i];
+            }
+        }
+    }
+    tjds_time->time_avg /= compiter;
+    tjds_time->time_stdev = calcStDevDouble(tjds_time->time_each, compiter);
+
+    return outputVector;
 }
 
 // Function: smvp_csr_debug
