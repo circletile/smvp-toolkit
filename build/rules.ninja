@@ -12,25 +12,6 @@
 # =============================================================================
 
 #############################################
-# Rule for compiling C files.
-
-rule C_COMPILER__mmio-readtest
-  depfile = $DEP_FILE
-  deps = gcc
-  command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -o $out   -c $in
-  description = Building C object $out
-
-
-#############################################
-# Rule for linking C executable.
-
-rule C_EXECUTABLE_LINKER__mmio-readtest
-  command = $PRE_LINK && /usr/bin/gcc-8 $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
-  description = Linking C executable $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
 # Rule for running custom commands.
 
 rule CUSTOM_COMMAND
@@ -41,7 +22,7 @@ rule CUSTOM_COMMAND
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__smvp-toolkit-gui
+rule C_COMPILER__mmio-writetest
   depfile = $DEP_FILE
   deps = gcc
   command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -o $out   -c $in
@@ -51,7 +32,7 @@ rule C_COMPILER__smvp-toolkit-gui
 #############################################
 # Rule for linking C executable.
 
-rule C_EXECUTABLE_LINKER__smvp-toolkit-gui
+rule C_EXECUTABLE_LINKER__mmio-writetest
   command = $PRE_LINK && /usr/bin/gcc-8 $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
@@ -79,7 +60,7 @@ rule C_EXECUTABLE_LINKER__smvp-toolkit-cli
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__mmio-writetest
+rule C_COMPILER__mmio-readtest
   depfile = $DEP_FILE
   deps = gcc
   command = /usr/bin/gcc-8 $DEFINES $INCLUDES $FLAGS -o $out   -c $in
@@ -89,7 +70,7 @@ rule C_COMPILER__mmio-writetest
 #############################################
 # Rule for linking C executable.
 
-rule C_EXECUTABLE_LINKER__mmio-writetest
+rule C_EXECUTABLE_LINKER__mmio-readtest
   command = $PRE_LINK && /usr/bin/gcc-8 $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
