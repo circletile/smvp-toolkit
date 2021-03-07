@@ -392,10 +392,10 @@ int main(int argc, const char *argv[])
             printf(ANSI_COLOR_RED "[ERROR]\tQuotation mismatch in path. Ensure path is enclosed by only one pair of quotation marks.\n" ANSI_COLOR_RESET);
             exit(1);
         case POPT_ERROR_BADNUMBER:
-            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iterations [-i|--iter] contains non-number characters.\n" ANSI_COLOR_RESET);
+            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iteration count contains non-number characters.\n" ANSI_COLOR_RESET);
             exit(1);
         case POPT_ERROR_OVERFLOW:
-            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iterations [-i|--iter] must be between 0 and approximately 1.8E19 (64-bit integer).\n" ANSI_COLOR_RESET);
+            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iteration count must be between 0 and approximately 1.8E19 (64-bit integer).\n" ANSI_COLOR_RESET);
             exit(1);
         default:
             fprintf(stderr, "%s: %s\n", poptBadOption(optCon, POPT_BADOPTION_NOALIAS), poptStrerror(c));
