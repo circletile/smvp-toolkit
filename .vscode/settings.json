@@ -2,7 +2,8 @@
     "files.associations": {
         "*.tcc": "c",
         "cstdlib": "c",
-        "memory": "c"
+        "memory": "c",
+        "string.h": "c"
     },
     "C_Cpp.default.cStandard": "c99",
     "C_Cpp.default.cppStandard": "c++11"

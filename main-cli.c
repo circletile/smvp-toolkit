@@ -7,7 +7,8 @@
 #define MAJOR_VER 0
 #define MINOR_VER 4
 #define REVISION_VER 0
-#define SMVP_CSR_DEBUG 0
+#define SMVP_CSR_DEBUG 1
+#define SMVP_TJDS_DEBUG 0
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,18 +60,14 @@ struct _time_data_
     double time_each[];
 };
 
-struct _time_data_ *newResultsData(struct _time_data_ *t, int num_runs, double *t_ea)
+// Function: newResultsData
+// Initializes and returns a _time_data_ struct
+struct _time_data_ *newResultsData(struct _time_data_ *t, int num_runs)
 {
-    double t_tot = 0;
+    t = (struct _time_data_ *)malloc(sizeof(*t) + (sizeof(double) * num_runs));
 
-    t = (struct _time_data_ *)malloc(sizeof(*t) + sizeof(double) * num_runs);
-    for (int i = 0; i < num_runs; i++)
-    {
-        t->time_each[i] = t_ea[i];
-        t_tot += t_ea[i];
-    }
-    t->time_total = t_tot;
-    t->time_avg = t_tot / num_runs;
+    t->time_total = 0;
+    t->time_avg = t->time_total / num_runs;
 
     return t;
 }
@@ -178,15 +175,14 @@ void generateReportFile()
 // Function: smvp_csr_compute
 // Calculates SMVP using CSR algorithm
 // Returns results vector directly, time data via pointer
-double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros, int compiter, struct _time_data_ *tData)
+double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros, int compiter, struct _time_data_ *csr_time)
 {
 
     CSRData workingMatrix;
     double *onesVector, *outputVector;
-    struct timespec tsCompStart, tsCompEnd;
     double comp_time_taken;
     int i, j, index;
-    double *time_run = (double *)malloc(sizeof(double) * compiter);
+    double *time_run = (double *)malloc(compiter * sizeof(double));
     struct timespec *time_run_start = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
     struct timespec *time_run_end = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
 
@@ -220,7 +216,7 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
         }
     }
 
-    // Prepare the "ones "vector and output vector
+    // Prepare the "ones" vector and output vector
     onesVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
     vectorInit(fInputRows, onesVector, 1);
     outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
@@ -232,10 +228,7 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
     // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
     //
 
-    // Capture compute start time
-    clock_gettime(CLOCK_MONOTONIC, &tsCompStart);
-
-    // Compute the sparse vector multiplication (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
+    // Compute CSR SMVP (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
     for (i = 0; i < compiter; i++)
     {
 
@@ -257,51 +250,59 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
         clock_gettime(CLOCK_MONOTONIC, &time_run_end[i]);
     }
 
-    // Capture compute final end time
-    clock_gettime(CLOCK_MONOTONIC, &tsCompEnd);
-
     //
     // ATOMIC SECTION END
     // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
     //
 
-    // Calculate time taken to perform calculations
-    comp_time_taken = (double)(tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
-    comp_time_taken = (comp_time_taken + (double)(tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
-
+    // Convert all per-run timespec structs to time in seconds & populate time structure
     for (i = 0; i < compiter; i++)
     {
         time_run[i] = (double)(time_run_end[i].tv_sec - time_run_start[i].tv_sec) * 1e9;
         time_run[i] = (comp_time_taken + (double)(time_run_end[i].tv_nsec - time_run_start[i].tv_nsec)) * 1e-9;
-    }
 
-    struct _time_data_ *csr_time = newResultsData(csr_time, compiter, time_run);
+        csr_time->time_each[i] = time_run[i];
+        csr_time->time_total += time_run[i];
+        csr_time->time_avg += time_run[i];
+    }
+    csr_time->time_avg /= compiter;
+
+    printf("[DEBUG]\tCSR JIT Vector Out:\n\t[");
+    for (i = 0; i < fInputRows; i++)
+    {
+        printf("%d, ", outputVector[i]);
+    }
+    printf("]\n\n");
 
     return outputVector;
 }
 
-/*
-void smvp_csr_debug(FILE *reportOutputFile, int fInputRows)
+void smvp_csr_debug(double *output_vector, struct _time_data_ *csr_time, int fInputRows, int fInputNonZeros, int iter)
 {
+
+    int index;
+
     // Append debug info in output file if required
-    fprintf(reportOutputFile, "[DEBUG]\tCSR row_ptr:\n[");
-    for (index = 0; index < fInputRows + 1; index++)
+    printf("[DEBUG]\tCSR Iterations: %d\n", iter);
+    printf("[DEBUG]\tCSR fInputRows: %d\n", fInputRows);
+    printf("[DEBUG]\tCSR fInputNonZeros: %d\n", fInputNonZeros);
+    printf("[DEBUG]\tCSR Total Time: %g\n", csr_time->time_total);
+    printf("[DEBUG]\tCSR Avg Time: %g\n", csr_time->time_avg);
+    printf("[DEBUG]\tCSR Times:\n");
+    printf("\t[");
+    for (index = 0; index < iter; index++)
     {
-        fprintf(reportOutputFile, "%d\n", workingMatrix.row_ptr[index]);
+        printf("%g, ", csr_time->time_each[index]);
     }
-    fprintf(reportOutputFile, "]\n[DEBUG]\tCSR val:\n[");
-    for (index = 0; index < fInputNonZeros; index++)
+    printf("]\n");
+    printf("[DEBUG]\tCSR Output Vector:\n");
+    printf("\t[");
+    for (index = 0; index < fInputRows; index++)
     {
-        fprintf(reportOutputFile, "%g\n", workingMatrix.val[index]);
+        printf("%d, ", output_vector[index]);
     }
-    fprintf(reportOutputFile, "]\n[DEBUG]\tCSR col_ind:\n[");
-    for (index = 0; index < fInputNonZeros; index++)
-    {
-        fprintf(reportOutputFile, "%d\n", workingMatrix.col_ind[index]);
-    }
-    fprintf(reportOutputFile, "]\n");
+    printf("]\n");
 }
-*/
 
 // Function: popt_usage
 // Displays syntax recommendations to the user when incorrrect arguments are passed to popt
@@ -313,6 +314,8 @@ void popt_usage(poptContext optCon, int exitcode, char *error, char *addl)
     exit(exitcode);
 }
 
+// Function: checkFolderExists
+// Checks if a folder exists at the specified location
 int checkFolderExists(char *path)
 {
     // Use POSIX stat() to retreive output folder properties
@@ -497,8 +500,7 @@ int main(int argc, const char *argv[])
     }
 
     // Load sparse matrix properties from input file
-    printf(ANSI_COLOR_MAGENTA "[FILE]\tInput matrix file name:\n" ANSI_COLOR_RESET);
-    printf("\t%s\n", inputFileName);
+    printf(ANSI_COLOR_MAGENTA "[FILE]\tInput matrix file name: " ANSI_COLOR_RESET "%s\n", inputFileName);
     printf(ANSI_COLOR_YELLOW "[INFO]\tLoading matrix content from source file.\n" ANSI_COLOR_RESET);
     mmio_rs_return = mm_read_mtx_crd_size(mmInputFile, &fInputRows, &fInputCols, &fInputNonZeros);
     if (mmio_rs_return != 0)
@@ -530,22 +532,25 @@ int main(int argc, const char *argv[])
         fclose(mmInputFile);
     }
 
-    printf(ANSI_COLOR_CYAN "[DATA]\tNon-zero numbers contained in matrix:\n" ANSI_COLOR_RESET);
-    printf("\t%d\n", fInputNonZeros);
-
-    printf(ANSI_COLOR_CYAN "[DATA]\tVector operand in use:\n" ANSI_COLOR_RESET);
-    printf("\tOnes vector with dimensions [%d, %d]\n", fInputRows, 1);
+    printf(ANSI_COLOR_CYAN "[DATA]\tNon-zero numbers contained in matrix: " ANSI_COLOR_RESET "%d\n", fInputNonZeros);
+    printf(ANSI_COLOR_CYAN "[DATA]\tVector operand in use: " ANSI_COLOR_RESET "Ones vector with dimensions [%d, %d]\n", fInputRows, 1);
 
     // Run each algorithm selected by user
     if (alg_mode & ALG_CSR)
     {
         // DO CSR
-        struct _time_data_ *csr_time;
-        int *output_vector_csr = smvp_csr_compute(mmImportData, fInputRows, fInputNonZeros, calc_iter, csr_time);
+        struct _time_data_ *csr_time = newResultsData(csr_time, calc_iter);
+        double *output_vector_csr = smvp_csr_compute(mmImportData, fInputRows, fInputNonZeros, calc_iter, csr_time);
+
+        if (SMVP_CSR_DEBUG)
+        {
+            smvp_csr_debug(output_vector_csr, csr_time, fInputRows, fInputNonZeros, calc_iter);
+        }
     }
     if (alg_mode & ALG_TJDS)
     {
         // DO TJDS
+        printf(ANSI_COLOR_CYAN "[DEBUG]\tTJDS NOT YET IMPLEMENTED\n" ANSI_COLOR_RESET);
     }
 
     /*
