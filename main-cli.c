@@ -1,14 +1,16 @@
 /* 
 *  ==================================================================
-*  main-cli.c v0.4 for smvp-toolbox
+*  main-cli.c v0.5.1 for smvp-toolbox
 *  ==================================================================
 */
 
 #define MAJOR_VER 0
-#define MINOR_VER 4
-#define REVISION_VER 0
+#define MINOR_VER 5
+#define REVISION_VER 1
 #define SMVP_CSR_DEBUG 0
+#define SMVP_TJDS_DEBUG 0
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -29,8 +31,8 @@
 
 #define ALG_ALL 255
 #define ALG_NONE 0
-#define ALG_CSR 1
-#define ALG_TJDS 2
+#define ALG_CSR (1 << 1)
+#define ALG_TJDS (1 << 2)
 
 // Struct: _mm_raw_data_
 // Provides a convenient structure for importing/exporting Matrix Market file contents
@@ -49,6 +51,53 @@ typedef struct _csr_data_
     int *col_ind;
     double *val;
 } CSRData;
+
+// Struct: _results_data_
+// Provides a convenient structure for storing/manipulating algorithm run results
+struct _time_data_
+{
+    double time_total;
+    double time_avg;
+    double time_stdev;
+    double time_min;
+    double time_max;
+    double time_each[];
+};
+
+// Function: newResultsData
+// Initializes and returns a _time_data_ struct
+struct _time_data_ *newResultsData(struct _time_data_ *t, int num_runs)
+{
+    t = (struct _time_data_ *)malloc(sizeof(*t) + (sizeof(double) * num_runs));
+
+    t->time_total = 0;
+    t->time_avg = 0;
+    t->time_stdev = 0;
+    t->time_min = 0;
+    t->time_max = 0;
+
+    return t;
+}
+
+// Function: calcStDevDouble
+// Calculates standard deviation for an array of doubles
+double calcStDevDouble(double data[], int len)
+{
+    int i;
+    double sum, mean, stdev;
+
+    for (i = 0; i < len; ++i)
+    {
+        sum += data[i];
+    }
+    mean = sum / len;
+    for (i = 0; i < len; ++i)
+    {
+        stdev += pow(data[i] - mean, 2);
+    }
+
+    return sqrt(stdev / len);
+}
 
 // Function: vectorInit
 // Reinitializes vectors between calculation iterations
@@ -105,33 +154,45 @@ int mmrd_comparator(const void *v1, const void *v2)
         return 0;
 }
 
-/*
-// Function: generateReportFile
+// Function: generateReportText
 // Generates a report file from calculation results
-void generateReportFile()
+void generateReportText(const char *inputFileName, int alg_mode, int fInputNonZeros, int fInputRows, int iter, double *outputVector, struct _time_data_ *timeData)
 {
 
-    char *outputFileName;
+    int index;
+    char *alg_name, *outputFileName;
     unsigned long outputFileTime;
     FILE *reportOutputFile;
+
+    if (alg_mode | ALG_CSR)
+    {
+        alg_name = "CSR";
+    }
+    else if (alg_mode | ALG_TJDS)
+    {
+        alg_name = "TJDS";
+    }
 
     //  Write compute time results and output vector to file
     outputFileName = (char *)malloc(sizeof(char) * 50); // Length is arbitrary, adjust as needed
     outputFileTime = ((unsigned long)time(NULL));
-    snprintf(outputFileName, 50, "smvp-csr_output_%lu.txt", outputFileTime);
+    snprintf(outputFileName, 50, "smvp-toolbox_report_%s_%lu.txt", alg_name, outputFileTime);
 
-    printf(ANSI_COLOR_MAGENTA "[FILE]\tCompute time and output vector saved as:\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_MAGENTA "[FILE]\tExecution report file saved as:\n" ANSI_COLOR_RESET);
     printf("\t%s\n", outputFileName);
 
     reportOutputFile = fopen(outputFileName, "a+");
-    fprintf(reportOutputFile, "Execution results for smvp-csr v.%d.%d.%d\n", MAJOR_VER, MINOR_VER, REVISION_VER);
+    fprintf(reportOutputFile, "Execution results for smvp-toolbox v.%d.%d.%d, %s algorithm\n", MAJOR_VER, MINOR_VER, REVISION_VER, alg_name);
     fprintf(reportOutputFile, "Generated on %lu (Unix time)\n\n", outputFileTime);
     fprintf(reportOutputFile, "Sparse matrix file in use:\n%s\n\n", inputFileName);
-    fprintf(reportOutputFile, "Non-zero numbers contained in matrix:\n");
-    fprintf(reportOutputFile, "%d\n\n", fInputNonZeros);
-    fprintf(reportOutputFile, "Compute time for 1000 iterations:\n");
-    fprintf(reportOutputFile, "%g seconds\n", comp_time_taken);
-    fprintf(reportOutputFile, "\nOutput vector (one cell per line):\n");
+    fprintf(reportOutputFile, "Non-zero numbers contained in matrix: %d\n\n", fInputNonZeros);
+    fprintf(reportOutputFile, "Compute times for %d iterations:\n\n", iter);
+    fprintf(reportOutputFile, "Total Time: %g seconds\n", timeData->time_total);
+    fprintf(reportOutputFile, "Average Time: %g seconds\n", timeData->time_avg);
+    fprintf(reportOutputFile, "Fastest Time: %g seconds\n", timeData->time_min);
+    fprintf(reportOutputFile, "Slowest Time: %g seconds\n", timeData->time_max);
+    fprintf(reportOutputFile, "Time StDev: %g seconds\n\n", timeData->time_stdev);
+    fprintf(reportOutputFile, "Output vector (one cell per line):\n");
     fprintf(reportOutputFile, "[\n");
     for (index = 0; index < fInputRows; index++)
     {
@@ -148,19 +209,28 @@ void generateReportFile()
 
     fclose(reportOutputFile);
 }
-*/
 
 // Function: smvp_csr_compute
 // Calculates SMVP using CSR algorithm
-void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros)
+// Returns results vector directly, time data via pointer
+double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZeros, int compiter, struct _time_data_ *csr_time)
 {
 
     CSRData workingMatrix;
     double *onesVector, *outputVector;
-    struct timespec tsCompStart, tsCompEnd;
     double comp_time_taken;
-    int j, compIter, index;
+    int i, j, index;
+    double *time_run = (double *)malloc(compiter * sizeof(double));
+    struct timespec *time_run_start = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
+    struct timespec *time_run_end = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
 
+    // Convert loaded data to CSR format
+    printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CSR format.\n" ANSI_COLOR_RESET);
+
+    // Sort imported data now to simplify future data processing
+    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator);
+
+    // Allocate memory for CSR storage
     workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
     workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
@@ -184,17 +254,47 @@ void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
         }
     }
 
-    // Prepare the "ones "vector and output vector
+    // Prepare the "ones" vector and output vector
     onesVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
     vectorInit(fInputRows, onesVector, 1);
     outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
 
-    // Capture compute start time
-    clock_gettime(CLOCK_MONOTONIC, &tsCompStart);
+    printf(ANSI_COLOR_YELLOW "[INFO]\tCalculating %d iterations of SMVP CSR.\n" ANSI_COLOR_RESET, compiter);
 
-    // Compute the sparse vector multiplication (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
-    for (compIter = 0; compIter < 1000; compIter++)
+    if (SMVP_CSR_DEBUG)
     {
+        printf("[DEBUG]\tCSR JIT row_ptr:\n\t[");
+        for (i = 0; i < fInputRows + 1; i++)
+        {
+            printf("%d, ", workingMatrix.row_ptr[i]);
+        }
+        printf("]\n");
+        printf("[DEBUG]\tCSR JIT val:\n\t[");
+        for (i = 0; i < fInputNonZeros; i++)
+        {
+            printf("%g, ", workingMatrix.val[i]);
+        }
+        printf("]\n");
+        printf("[DEBUG]\tCSR JIT col_ind:\n\t[");
+        for (i = 0; i < fInputNonZeros; i++)
+        {
+            printf("%d, ", workingMatrix.col_ind[i]);
+        }
+        printf("]\n\n");
+    }
+
+    //
+    // ATOMIC SECTION START
+    // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
+    //
+
+    // Compute CSR SMVP (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
+    for (i = 0; i < compiter; i++)
+    {
+
+        // Capture compute run start time
+        clock_gettime(CLOCK_MONOTONIC, &time_run_start[i]);
+
         //Reset output vector contents between iterations
         vectorInit(fInputRows, outputVector, 0);
 
@@ -205,38 +305,87 @@ void smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZero
                 outputVector[index] += workingMatrix.val[j] * onesVector[workingMatrix.col_ind[j]];
             }
         }
+
+        // Capture compute run end time
+        clock_gettime(CLOCK_MONOTONIC, &time_run_end[i]);
     }
 
-    // Capture compute end time & derive elapsed time
-    clock_gettime(CLOCK_MONOTONIC, &tsCompEnd);
-    comp_time_taken = (double)(tsCompEnd.tv_sec - tsCompStart.tv_sec) * 1e9;
-    comp_time_taken = (comp_time_taken + (double)(tsCompEnd.tv_nsec - tsCompStart.tv_nsec)) * 1e-9;
+    //
+    // ATOMIC SECTION END
+    // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
+    //
 
-    // RETURN SOMETHING
+    // Convert all per-run timespec structs to time in seconds & populate time structure
+    for (i = 0; i < compiter; i++)
+    {
+        time_run[i] = (double)(time_run_end[i].tv_sec - time_run_start[i].tv_sec) * 1e9;
+        time_run[i] = (comp_time_taken + (double)(time_run_end[i].tv_nsec - time_run_start[i].tv_nsec)) * 1e-9;
+
+        csr_time->time_each[i] = time_run[i];
+        csr_time->time_total += time_run[i];
+        csr_time->time_avg += time_run[i];
+
+        if (i == 0)
+        {
+            csr_time->time_min = time_run[i];
+            csr_time->time_max = time_run[i];
+        }
+        else
+        {
+            if (csr_time->time_min > time_run[i])
+            {
+                csr_time->time_min = time_run[i];
+            }
+            if (csr_time->time_max < time_run[i])
+            {
+                csr_time->time_max = time_run[i];
+            }
+        }
+    }
+    csr_time->time_avg /= compiter;
+    csr_time->time_stdev = calcStDevDouble(csr_time->time_each, compiter);
+
+    if (SMVP_CSR_DEBUG)
+    {
+        printf("[DEBUG]\tCSR JIT Vector Out:\n\t[");
+        for (i = 0; i < fInputRows; i++)
+        {
+            printf("%g, ", outputVector[i]);
+        }
+        printf("]\n\n");
+    }
+
+    return outputVector;
 }
 
-/*
-void smvp_csr_debug(FILE *reportOutputFile, int fInputRows)
+// Function: smvp_csr_debug
+// Because sometimes things just don't go the way you hoped they would
+void smvp_csr_debug(double *output_vector, struct _time_data_ *csr_time, int fInputRows, int fInputNonZeros, int iter)
 {
-    // Append debug info in output file if required
-    fprintf(reportOutputFile, "[DEBUG]\tCSR row_ptr:\n[");
-    for (index = 0; index < fInputRows + 1; index++)
+
+    int index;
+
+    printf("[DEBUG]\tCSR Iterations: %d\n", iter);
+    printf("[DEBUG]\tCSR fInputRows: %d\n", fInputRows);
+    printf("[DEBUG]\tCSR fInputNonZeros: %d\n", fInputNonZeros);
+    printf("[DEBUG]\tCSR Total Time: %g\n", csr_time->time_total);
+    printf("[DEBUG]\tCSR Avg Time: %g\n", csr_time->time_avg);
+    printf("[DEBUG]\tCSR StDev Time: %g\n", csr_time->time_avg);
+    printf("[DEBUG]\tCSR Times:\n");
+    printf("\t[");
+    for (index = 0; index < iter; index++)
     {
-        fprintf(reportOutputFile, "%d\n", workingMatrix.row_ptr[index]);
+        printf("%g, ", csr_time->time_each[index]);
     }
-    fprintf(reportOutputFile, "]\n[DEBUG]\tCSR val:\n[");
-    for (index = 0; index < fInputNonZeros; index++)
+    printf("]\n");
+    printf("[DEBUG]\tCSR Output Vector:\n");
+    printf("\t[");
+    for (index = 0; index < fInputRows; index++)
     {
-        fprintf(reportOutputFile, "%g\n", workingMatrix.val[index]);
+        printf("%g, ", output_vector[index]);
     }
-    fprintf(reportOutputFile, "]\n[DEBUG]\tCSR col_ind:\n[");
-    for (index = 0; index < fInputNonZeros; index++)
-    {
-        fprintf(reportOutputFile, "%d\n", workingMatrix.col_ind[index]);
-    }
-    fprintf(reportOutputFile, "]\n");
+    printf("]\n\n");
 }
-*/
 
 // Function: popt_usage
 // Displays syntax recommendations to the user when incorrrect arguments are passed to popt
@@ -248,6 +397,8 @@ void popt_usage(poptContext optCon, int exitcode, char *error, char *addl)
     exit(exitcode);
 }
 
+// Function: checkFolderExists
+// Checks if a folder exists at the specified location
 int checkFolderExists(char *path)
 {
     // Use POSIX stat() to retreive output folder properties
@@ -392,10 +543,10 @@ int main(int argc, const char *argv[])
             printf(ANSI_COLOR_RED "[ERROR]\tQuotation mismatch in path. Ensure path is enclosed by only one pair of quotation marks.\n" ANSI_COLOR_RESET);
             exit(1);
         case POPT_ERROR_BADNUMBER:
-            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iterations [-i|--iter] contains non-number characters.\n" ANSI_COLOR_RESET);
+            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iteration count contains non-number characters.\n" ANSI_COLOR_RESET);
             exit(1);
         case POPT_ERROR_OVERFLOW:
-            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iterations [-i|--iter] must be between 0 and approximately 1.8E19 (64-bit integer).\n" ANSI_COLOR_RESET);
+            printf(ANSI_COLOR_RED "[ERROR]\tArgument for iteration count must be between 0 and approximately 1.8E19 (64-bit integer).\n" ANSI_COLOR_RESET);
             exit(1);
         default:
             fprintf(stderr, "%s: %s\n", poptBadOption(optCon, POPT_BADOPTION_NOALIAS), poptStrerror(c));
@@ -415,7 +566,7 @@ int main(int argc, const char *argv[])
         exit(1);
     }
 
-    // Done parsing options/args, release popt context instance
+    // Done parsing options/args, release popt instance
     poptFreeContext(optCon);
     printf(ANSI_COLOR_GREEN "\n[START]\tExecuting smvp-toolbox-cli v%d.%d.%d\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
@@ -432,8 +583,7 @@ int main(int argc, const char *argv[])
     }
 
     // Load sparse matrix properties from input file
-    printf(ANSI_COLOR_MAGENTA "[FILE]\tInput matrix file name:\n" ANSI_COLOR_RESET);
-    printf("\t%s\n", inputFileName);
+    printf(ANSI_COLOR_MAGENTA "[FILE]\tInput matrix file name: " ANSI_COLOR_RESET "%s\n", inputFileName);
     printf(ANSI_COLOR_YELLOW "[INFO]\tLoading matrix content from source file.\n" ANSI_COLOR_RESET);
     mmio_rs_return = mm_read_mtx_crd_size(mmInputFile, &fInputRows, &fInputCols, &fInputNonZeros);
     if (mmio_rs_return != 0)
@@ -459,42 +609,33 @@ int main(int argc, const char *argv[])
         mmImportData[index].col--;
     }
 
-    // Sort imported data now to simplify future data processing
-    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator);
-
     // Close input file only if it isn't somehow mapped as keyboard input
     if (mmInputFile != stdin)
     {
         fclose(mmInputFile);
     }
 
-    printf(ANSI_COLOR_CYAN "[DATA]\tNon-zero numbers contained in matrix:\n" ANSI_COLOR_RESET);
-    printf("\t%d\n", fInputNonZeros);
+    printf(ANSI_COLOR_CYAN "[DATA]\tNon-zero numbers contained in matrix: " ANSI_COLOR_RESET "%d\n", fInputNonZeros);
+    printf(ANSI_COLOR_CYAN "[DATA]\tVector operand in use: " ANSI_COLOR_RESET "Ones vector with dimensions [%d, %d]\n", fInputRows, 1);
 
-    // Convert loaded data to CSR format
-    printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CSR format.\n" ANSI_COLOR_RESET);
-    printf(ANSI_COLOR_CYAN "[DATA]\tVector operand in use:\n" ANSI_COLOR_RESET);
-    printf("\tOnes vector with dimensions [%d, %d]\n", fInputRows, 1);
-
-    printf(ANSI_COLOR_YELLOW "[INFO]\tComputing n=1000 sparse-vector multiplication iterations.\n" ANSI_COLOR_RESET);
-
-    if (alg_mode == ALG_CSR)
+    // Run each algorithm selected by user
+    if (alg_mode & ALG_CSR)
     {
-        //DO CSR
-    }
-    else if (alg_mode == ALG_TJDS)
-    {
-        //DO TJDS
-    }
-    else if (alg_mode == ALG_ALL)
-    {
-        //DO ALL
-    }
+        // DO CSR
+        struct _time_data_ *csr_time = newResultsData(csr_time, calc_iter);
+        double *output_vector_csr = smvp_csr_compute(mmImportData, fInputRows, fInputNonZeros, calc_iter, csr_time);
+        generateReportText(inputFileName, ALG_CSR, fInputNonZeros, fInputRows, calc_iter, output_vector_csr, csr_time);
 
-    /*
-    printf(ANSI_COLOR_CYAN "[DATA]\tVector product computation time:\n" ANSI_COLOR_RESET);
-    printf("\t%g seconds\n", comp_time_taken);
-    */
+        if (SMVP_CSR_DEBUG)
+        {
+            smvp_csr_debug(output_vector_csr, csr_time, fInputRows, fInputNonZeros, calc_iter);
+        }
+    }
+    if (alg_mode & ALG_TJDS)
+    {
+        // DO TJDS
+        printf(ANSI_COLOR_CYAN "[DEBUG]\tTJDS NOT YET IMPLEMENTED\n" ANSI_COLOR_RESET);
+    }
 
     printf(ANSI_COLOR_GREEN "[STOP]\tExit smvp-csr v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 

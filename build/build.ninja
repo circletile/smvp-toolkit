@@ -290,7 +290,7 @@ build CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o: C_COMPILER__smvp-toolkit-cl
 # Link the executable smvp-toolkit-cli
 
 build smvp-toolkit-cli: C_EXECUTABLE_LINKER__smvp-toolkit-cli CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o
-  LINK_LIBRARIES = -lpopt
+  LINK_LIBRARIES = -lpopt -lm
   OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
   POST_BUILD = :
   PRE_LINK = :
