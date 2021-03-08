@@ -13,9 +13,10 @@ cmake --build ./build --config release --clean-first
 
 Run instructions:
 ```
-./build/smvp-toolkit /path/to/matrixmarket/file.mtx
+./build/smvp-toolkit-cli --all-algs -n 1000 /path/to/matrixmarket/file.mtx
 
-For additional usage instructions and options:
-./build/smvp-toolkit --help
+For additional usage instructions:
+
+./build/smvp-toolkit-cli --help
 ```
 After a run completes, a report file will be generated in the current working directory.
