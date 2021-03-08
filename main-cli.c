@@ -458,24 +458,26 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     struct timespec *time_run_start = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
     struct timespec *time_run_end = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
 
+
+    if (SMVP_TJDS_DEBUG)
+    {
+        printf(ANSI_COLOR_RED "[DEBUG]\tIF YOU CAN READ THIS MESSAGE, TJDS IMPLEMENTATION MAY BE INCOMPLETE AND/OR BROKEN\n" ANSI_COLOR_RESET);
+    }
+
     // Convert loaded data to TJDS format
     printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to TJDS format.\n" ANSI_COLOR_RESET);
-
-    // Sort imported data by row to help determine start position count
-    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator_col_row);
-    int sp_count = mmImportData[fInputNonZeros - 1].row - 1;
 
     // Allocate memory for TJDS storage
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
     workingMatrix.row_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
-    workingMatrix.start_pos = (int *)malloc(sizeof(int) * (long unsigned int)(sp_count));
+    workingMatrix.start_pos = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows));
 
     // Prepare the "ones" vector and output vector
     onesVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
     vectorInit(fInputRows, onesVector, 1);
     outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
 
-    // Sort imported data by columns to simplify future data processing (not ideal to re-sort, but bound by submission deadline...)
+    // Sort imported data by columns to simplify future data processing
     qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator_col_row);
 
     /* Convert MatrixMarket format into TJDS format */
@@ -675,7 +677,7 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     }
 
     // Derive number of transpose jagged diagonals
-    num_tjdiag = sp_count - 1;
+    num_tjdiag = fInputRows - 1;
 
     if (SMVP_TJDS_DEBUG)
     {
@@ -693,7 +695,7 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         }
         printf("]\n");
         printf("\tstart_pos:\t[");
-        for (index = 0; index < sp_count; index++)
+        for (index = 0; index < fInputRows - 2; index++)
         {
             printf("%d, ", workingMatrix.start_pos[index]);
         }
@@ -769,6 +771,17 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     }
     tjds_time->time_avg /= compiter;
     tjds_time->time_stdev = calcStDevDouble(tjds_time->time_each, compiter);
+
+    if (SMVP_TJDS_DEBUG)
+    {
+        printf("[DEBUG]\tTJDS PHASE 8: Output Vector:\n");
+        printf("\t[");
+        for (index = 0; index < fInputRows; index++)
+        {
+            printf("%g, ", outputVector[index]);
+        }
+        printf("]\n\n");
+    }
 
     return outputVector;
 }

@@ -1,0 +1,26 @@
+Execution results for smvp-toolbox v.0.5.1, TJDS algorithm
+Generated on 1615179011 (Unix time)
+
+Sparse matrix file in use:
+./sample-data/pdp08-pg4.mtx
+
+Non-zero numbers contained in matrix: 16
+
+Compute times for 1 iterations:
+
+Total Time: 3e-07 seconds
+Average Time: 3e-07 seconds
+Fastest Time: 3e-07 seconds
+Slowest Time: 3e-07 seconds
+Time StDev: 2.6301e-155 seconds
+
+Output vector (one cell per line):
+[
+22
+21
+5
+0
+0
+0
+]
+
