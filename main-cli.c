@@ -8,7 +8,7 @@
 #define MINOR_VER 5
 #define REVISION_VER 1
 #define SMVP_CSR_DEBUG 0
-#define SMVP_TJDS_DEBUG 0
+#define SMVP_TJDS_DEBUG 1
 
 #include <math.h>
 #include <stdio.h>
@@ -42,6 +42,16 @@ typedef struct _mm_raw_data_
     int col;
     double val;
 } MMRawData;
+
+// Struct: _mm_data_plus_
+// Provides a sligktly larger structure than _mm_raw_data_for retaining row data for TJDS
+typedef struct _mm_data_plus_
+{
+    int row;
+    int row_orig;
+    int col;
+    double val;
+} MMDataPlus;
 
 // Struct: _csr_data_
 // Provides a convenient structure for storing/manipulating CSR compressed data
@@ -209,6 +219,25 @@ int txtable_comparator_len(const void *v1, const void *v2)
         return 0;
 }
 
+// Function: mmdp_comparator_row_col
+// Provides a comparitor function for MMDataPlus structs that matches the format expected by stdlib qsort()
+// Sorts data by row (lowest = leftmost), then by column (lowest = leftmost)
+int mmdp_comparator_row_col(const void *v1, const void *v2)
+{
+    const MMDataPlus *p1 = (MMDataPlus *)v1;
+    const MMDataPlus *p2 = (MMDataPlus *)v2;
+    if (p1->row < p2->row)
+        return -1;
+    else if (p1->row > p2->row)
+        return +1;
+    else if (p1->col < p2->col)
+        return -1;
+    else if (p1->col > p2->col)
+        return +1;
+    else
+        return 0;
+}
+
 // Function: generateReportText
 // Generates a report file from calculation results
 void generateReportText(const char *inputFileName, int alg_mode, int fInputNonZeros, int fInputRows, int iter, double *outputVector, struct _time_data_ *timeData)
@@ -219,11 +248,11 @@ void generateReportText(const char *inputFileName, int alg_mode, int fInputNonZe
     unsigned long outputFileTime;
     FILE *reportOutputFile;
 
-    if (alg_mode | ALG_CSR)
+    if (alg_mode & ALG_CSR)
     {
         alg_name = "CSR";
     }
-    else if (alg_mode | ALG_TJDS)
+    else if (alg_mode & ALG_TJDS)
     {
         alg_name = "TJDS";
     }
@@ -347,12 +376,11 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
     // Compute CSR SMVP (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
     for (i = 0; i < compiter; i++)
     {
+        //Reset output vector contents between iterations
+        vectorInit(fInputRows, outputVector, 0);
 
         // Capture compute run start time
         clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_start[i]);
-
-        //Reset output vector contents between iterations
-        vectorInit(fInputRows, outputVector, 0);
 
         for (index = 0; index < fInputRows; index++)
         {
@@ -421,9 +449,9 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
 {
 
     TJDSData workingMatrix;
-    MMRawData *mmCloneData;
+    MMDataPlus *mmCloneData;
     TXTable *txList = (struct _transpose_table_ *)malloc(sizeof(struct _transpose_table_) * fInputColumns);
-    int index, txIter, i;
+    int index, txIter, i, num_tjdiag, k, p, j, sp_index;
     double *onesVector, *outputVector, *onesVectorTemp;
     double comp_time_taken;
     double *time_run = (double *)malloc(compiter * sizeof(double));
@@ -433,28 +461,50 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     // Convert loaded data to TJDS format
     printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to TJDS format.\n" ANSI_COLOR_RESET);
 
-    // Sort imported data now to simplify future data processing
+    // Sort imported data by row to help determine start position count
     qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator_col_row);
+    int sp_count = mmImportData[fInputNonZeros - 1].row - 1;
 
     // Allocate memory for TJDS storage
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
     workingMatrix.row_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
-    workingMatrix.start_pos = (int *)malloc(sizeof(int) * (long unsigned int)(mmImportData[fInputNonZeros - 1].row + 1));
+    workingMatrix.start_pos = (int *)malloc(sizeof(int) * (long unsigned int)(sp_count));
 
     // Prepare the "ones" vector and output vector
     onesVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
     vectorInit(fInputRows, onesVector, 1);
     outputVector = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
 
+    // Sort imported data by columns to simplify future data processing (not ideal to re-sort, but bound by submission deadline...)
+    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator_col_row);
+
     /* Convert MatrixMarket format into TJDS format */
 
+    if (SMVP_TJDS_DEBUG)
+    {
+        printf("[DEBUG]\tTJDS PHASE 0: Original Data (shown sideways):\n");
+        printf("\t[");
+        for (index = 0; index < fInputNonZeros; index++)
+        {
+            printf("%g (%d), ", mmImportData[index].val, mmImportData[index].row);
+            if (mmImportData[index].col < mmImportData[index + 1].col)
+            {
+                printf("\n\t");
+            }
+        }
+        printf("]\n\n");
+    }
+
     // 1. Allocate a "clone" import data object so we don't clobber the original data during compression (in case other algs will be called later)
-    mmCloneData = (MMRawData *)malloc(sizeof(MMRawData) * (long unsigned int)fInputNonZeros);
+    mmCloneData = (MMDataPlus *)malloc(sizeof(MMDataPlus) * (long unsigned int)fInputNonZeros);
 
     // 2. Compress import data vertically
     for (index = 0; index < fInputNonZeros; index++)
     {
-        // The column and value won't change just yet.
+        // Capture the original row of the cell
+        mmCloneData[index].row_orig = mmImportData[index].row;
+
+        // The column and value don't change.
         mmCloneData[index].col = mmImportData[index].col;
         mmCloneData[index].val = mmImportData[index].val;
 
@@ -470,40 +520,85 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
             // ...and the column has changed between the current and previous NNZ...
             if (mmImportData[index].col > mmImportData[index - 1].col)
             {
-                // ...relocate the NNZ to the top of the column (row translate)...
+                // ...relocate the NNZ to the top of the column (row translate).
                 mmCloneData[index].row = 0;
-
-                // ...document the column length and position of the previous column....
-                txList[mmCloneData[index - 1].col].colLength = mmCloneData[index - 1].row;
-                txList[mmCloneData[index - 1].col].originCol = mmCloneData[index - 1].col;
             }
             // ...and there's a row gap between the current and previous NNZ...
-            else if ((mmImportData[index].row - mmImportData[index - 1].row) > 1)
+            else if ((mmImportData[index].row - mmImportData[index - 1].row) > 0)
             {
                 // ...relocate the NNZ to just below thw previous NNZ (row translate).
-                mmCloneData[index].row = (mmImportData[index - 1].row + 1);
+                mmCloneData[index].row = (mmCloneData[index - 1].row + 1);
             }
             // ...and there's no row gap between the current and previous NNZ (DEFAULT CASE ASSUMPTION)...
             else
             {
                 // ...do nothing to the row of the NNZ.
-                mmCloneData[index].row = mmImportData[index].row;
-            }
-
-            // ...and this is also the last NNZ...
-            if (index == fInputNonZeros - 1)
-            {
-                // ...document the column length and position of the this last column.
-                txList[mmCloneData[index].col].colLength = mmCloneData[index].row;
-                txList[mmCloneData[index].col].originCol = mmCloneData[index].col;
+                mmCloneData[index].row = mmCloneData[index].row;
             }
         }
     }
 
-    // 3. Generate reording vectors
+    if (SMVP_TJDS_DEBUG)
+    {
+        printf("[DEBUG]\tTJDS PHASE 2: Compress Matrix Vertically (shown sideways):\n");
+        printf("\t[");
+        for (index = 0; index < fInputNonZeros; index++)
+        {
+            printf("%g (%d), ", mmCloneData[index].val, mmCloneData[index].row);
+            if (mmCloneData[index].col < mmCloneData[index + 1].col)
+            {
+                printf("\n\t");
+            }
+        }
+        printf("]\n\n");
+    }
+
+    // Generate reordering table
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        if (mmCloneData[index].col < mmCloneData[index + 1].col)
+        {
+            // ...document the column length and position of the previous column....
+            txList[mmCloneData[index].col].colLength = mmCloneData[index].row;
+            txList[mmCloneData[index].col].originCol = mmCloneData[index].col;
+        }
+
+        // ...and this is also the last NNZ...
+        if (index == fInputNonZeros - 1)
+        {
+            // ...document the column length and position of the this last column.
+            txList[mmCloneData[index].col].colLength = mmCloneData[index].row;
+            txList[mmCloneData[index].col].originCol = mmCloneData[index].col;
+        }
+    }
+
+    // 3. Sort reordering table
     qsort(txList, (size_t)fInputColumns, sizeof(TXTable), txtable_comparator_len);
 
-    // 4. Reassign import data column assignments using reordering vectors
+    if (SMVP_TJDS_DEBUG)
+    {
+        printf("[DEBUG]\tTJDS PHASE 3: Reordering Table:\n");
+        printf("key\t[");
+        for (index = 0; index < fInputColumns; index++)
+        {
+            printf("%d, ", index);
+        }
+        printf("]\n");
+        printf("origCol\t[");
+        for (index = 0; index < fInputColumns; index++)
+        {
+            printf("%d, ", txList[index].originCol);
+        }
+        printf("]\n");
+        printf("colLen\t[");
+        for (index = 0; index < fInputColumns; index++)
+        {
+            printf("%d, ", txList[index].colLength);
+        }
+        printf("]\n\n");
+    }
+
+    // 4. Reassign import data column assignments and recorded row indicies using reordering table
     for (index = 0; index < fInputNonZeros; index++)
     {
         for (txIter = 0; txIter < fInputColumns; txIter++)
@@ -535,14 +630,78 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     }
     free(onesVectorTemp);
 
-
     // 6. Import data into appropriate TJDS structures
-    for (index = 0; index < fInputNonZeros; index ++){
-        workingMatrix.val[index] = mmCloneData[index].val;
+    qsort(mmCloneData, (size_t)fInputNonZeros, sizeof(MMDataPlus), mmdp_comparator_row_col);
+
+    if (SMVP_TJDS_DEBUG)
+    {
+        printf("[DEBUG]\tTJDS PHASE 6: Reorder Columns (shown normal):\n");
+        printf("\t[");
+        for (index = 0; index < fInputNonZeros; index++)
+        {
+            printf("%g, ", mmCloneData[index].val);
+            if (mmCloneData[index].row < mmCloneData[index + 1].row)
+            {
+                printf("\n\t");
+            }
+        }
+        printf("]\n\n");
     }
-    
 
+    // Copy values and col_orig as-ordered since they're already sorted correctly
+    sp_index = 0;
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        workingMatrix.val[index] = mmCloneData[index].val;
+        workingMatrix.row_ind[index] = mmCloneData[index].row_orig;
 
+        // Start position of first NNZ is always zero
+        if (index == 0)
+        {
+            workingMatrix.start_pos[sp_index] = index;
+            sp_index++;
+        }
+        // If the row has incremented, capture the row as a start position
+        else if (mmCloneData[index].row > mmCloneData[index - 1].row)
+        {
+            workingMatrix.start_pos[sp_index] = index;
+            sp_index++;
+        }
+        // If we're at the end of the value list, record the "next" value as the last start position
+        else if (index == fInputNonZeros - 1)
+        {
+            workingMatrix.start_pos[sp_index] = index + 1;
+        }
+    }
+
+    // Derive number of transpose jagged diagonals
+    num_tjdiag = sp_count - 1;
+
+    if (SMVP_TJDS_DEBUG)
+    {
+        printf("[DEBUG]\tTJDS PHASE 7: Pre-Calc Fields:\n");
+        printf("\tval:\t\t[");
+        for (index = 0; index < fInputNonZeros; index++)
+        {
+            printf("%g, ", workingMatrix.val[index]);
+        }
+        printf("]\n");
+        printf("\trow_ind:\t[");
+        for (index = 0; index < fInputNonZeros; index++)
+        {
+            printf("%d, ", workingMatrix.row_ind[index]);
+        }
+        printf("]\n");
+        printf("\tstart_pos:\t[");
+        for (index = 0; index < sp_count; index++)
+        {
+            printf("%d, ", workingMatrix.start_pos[index]);
+        }
+        printf("]\n\n");
+    }
+
+    //free(mmImportData);
+    free(mmCloneData);
 
     printf(ANSI_COLOR_YELLOW "[INFO]\tCalculating %d iterations of SMVP TJDS.\n" ANSI_COLOR_RESET, compiter);
 
@@ -555,13 +714,22 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     for (i = 0; i < compiter; i++)
     {
 
-        // Capture compute run start time
-        clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_start[i]);
-
         //Reset output vector contents between iterations
         vectorInit(fInputRows, outputVector, 0);
 
-        /* DO TJDS VHERK HEER */
+        // Capture compute run start time
+        clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_start[i]);
+
+        for (index = 0; index < num_tjdiag; index++)
+        {
+            k = 0;
+            for (j = workingMatrix.start_pos[index]; j < workingMatrix.start_pos[index + 1] - 1; j++)
+            {
+                p = workingMatrix.row_ind[k];
+                outputVector[p] += workingMatrix.val[j] * onesVector[k];
+                k++;
+            }
+        }
 
         // Capture compute run end time
         clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_end[i]);
