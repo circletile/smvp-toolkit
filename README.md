@@ -3,20 +3,32 @@ Implement sparse matrix vector product calculations using CSR and TJDS compressi
 
 **IMPORTANT: CMake is required to build this program. CMake is available at https://cmake.org/download/**
 
-**The popt development library is required to build this program. Check your OS's package manager for libpopt-devel or similar.**
+**The popt development library is required to build this program.**
 
-Build instructions:
+Install popt on Debian/Ubuntu:
+```
+apt install libpopt-devel
+```
+
+Install popt on OSX (requires Homebrew):
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install popt
+```
+
+
+smvp-toolkit build instructions:
 ```
 git clone https://github.com/circletile/smvp-toolkit.git
 cd smvp-csr
 cmake --build ./build --config release --clean-first
 ```
 
-Run instructions:
+smvp-toolkit run instructions:
 ```
 ./build/smvp-toolkit-cli --all-algs -n 1000 /path/to/matrixmarket/file.mtx
 
-For additional usage instructions:
+For additional options/features:
 
 ./build/smvp-toolkit-cli --help
 ```
