@@ -1,12 +1,12 @@
 /* 
 *  ==================================================================
-*  main-cli.c v0.6.2 for smvp-toolbox
+*  main-cli.c v0.6.3 for smvp-toolbox
 *  ==================================================================
 */
 
 #define MAJOR_VER 0
 #define MINOR_VER 6
-#define REVISION_VER 2
+#define REVISION_VER 3
 #define SMVP_CSR_DEBUG 0
 #define SMVP_TJDS_DEBUG 0
 
@@ -240,11 +240,11 @@ int mmdp_comparator_row_col(const void *v1, const void *v2)
 
 // Function: generateReportText
 // Generates a report file from calculation results
-void generateReportText(const char *inputFileName, int alg_mode, int fInputNonZeros, int fInputRows, int iter, double *outputVector, struct _time_data_ *timeData)
+void generateReportText(const char *inputFileName, char *reportPath, int alg_mode, int fInputNonZeros, int fInputRows, int iter, double *outputVector, struct _time_data_ *timeData)
 {
 
-    int index;
-    char *alg_name, *outputFileName;
+    int index, pathLen, filenameLen;
+    char *alg_name, *outputFileName, *outputFullPath, *dirDelimiter;
     unsigned long outputFileTime;
     FILE *reportOutputFile;
 
@@ -257,15 +257,37 @@ void generateReportText(const char *inputFileName, int alg_mode, int fInputNonZe
         alg_name = "TJDS";
     }
 
-    //  Write compute time results and output vector to file
-    outputFileName = (char *)malloc(sizeof(char) * 50); // Length is arbitrary, adjust as needed
+    dirDelimiter = "/";
+
+    // Dynamically generate report file name
+    filenameLen = 100;
+    outputFileName = (char *)malloc(sizeof(char) * filenameLen); // Length is arbitrary, adjust as needed
     outputFileTime = ((unsigned long)time(NULL));
-    snprintf(outputFileName, 50, "smvp-toolbox_report_%s_%lu.txt", alg_name, outputFileTime);
+    snprintf(outputFileName, filenameLen, "smvp-toolbox_report_%s_%lu.txt", alg_name, outputFileTime);
 
+    // Concatenate report folder path and filename if required
+    if (reportPath && reportPath[0] == '\0')
+    {
+        outputFullPath = (char *)malloc(sizeof(char) * filenameLen);
+        snprintf(outputFullPath, filenameLen, "%s", outputFileName);
+    }
+    else
+    {
+        pathLen = strlen(reportPath) + filenameLen;
+        outputFullPath = (char *)malloc(sizeof(char) * pathLen);
+        snprintf(outputFullPath, pathLen, "%s", reportPath);
+        if (reportPath[strlen(reportPath) - 1] != '/')
+        {
+            strncat(outputFullPath, dirDelimiter, pathLen);
+        }
+        strncat(outputFullPath, outputFileName, pathLen);
+    }
+
+    //  Write compute time results and output vector to file
     printf(ANSI_COLOR_MAGENTA "[FILE]\tExecution report file saved as:\n" ANSI_COLOR_RESET);
-    printf("\t%s\n", outputFileName);
+    printf("\t%s\n", outputFullPath);
 
-    reportOutputFile = fopen(outputFileName, "a+");
+    reportOutputFile = fopen(outputFullPath, "a+");
     fprintf(reportOutputFile, "Execution results for smvp-toolbox v.%d.%d.%d, %s algorithm\n", MAJOR_VER, MINOR_VER, REVISION_VER, alg_name);
     fprintf(reportOutputFile, "Generated on %lu (Unix time)\n\n", outputFileTime);
     fprintf(reportOutputFile, "Sparse matrix file in use:\n%s\n\n", inputFileName);
@@ -869,7 +891,7 @@ int main(int argc, const char *argv[])
         {"csr", 'c', POPT_ARG_NONE, NULL, 'c', "Enable CSR SMVP algorithm.", NULL},
         {"tjds", 't', POPT_ARG_NONE, NULL, 't', "Enable TJDS SMVP algorithm.", NULL},
         {"number", 'n', POPT_ARG_INT, &popt_field.iter, 'n', "Number of computation iterations per-algorithm.", "1000"},
-        {"output", 'o', POPT_ARG_STRING, &popt_field.outputFolder, 'o', "Output folder for reports.", "./"},
+        {"dir", 'd', POPT_ARG_STRING, &popt_field.outputFolder, 'd', "Output folder for reports.", "./"},
         POPT_AUTOHELP
             POPT_TABLEEND};
 
@@ -938,7 +960,7 @@ int main(int argc, const char *argv[])
                 exit(1);
             }
             break;
-        case 'o':
+        case 'd':
             // Determine folder existance and act accordingly
             if (checkFolderExists(popt_field.outputFolder))
             {
@@ -1052,7 +1074,7 @@ int main(int argc, const char *argv[])
         // DO CSR
         struct _time_data_ *csr_time = newResultsData(csr_time, calc_iter);
         double *output_vector_csr = smvp_csr_compute(mmImportData, fInputRows, fInputNonZeros, calc_iter, csr_time);
-        generateReportText(inputFileName, ALG_CSR, fInputNonZeros, fInputRows, calc_iter, output_vector_csr, csr_time);
+        generateReportText(inputFileName, reportPath, ALG_CSR, fInputNonZeros, fInputRows, calc_iter, output_vector_csr, csr_time);
 
         if (SMVP_CSR_DEBUG)
         {
@@ -1064,7 +1086,7 @@ int main(int argc, const char *argv[])
         // DO TJDS
         struct _time_data_ *tjds_time = newResultsData(tjds_time, calc_iter);
         double *output_vector_tjds = smvp_tjds_compute(mmImportData, fInputRows, fInputCols, fInputNonZeros, calc_iter, tjds_time);
-        generateReportText(inputFileName, ALG_TJDS, fInputNonZeros, fInputRows, calc_iter, output_vector_tjds, tjds_time);
+        generateReportText(inputFileName, reportPath, ALG_TJDS, fInputNonZeros, fInputRows, calc_iter, output_vector_tjds, tjds_time);
     }
 
     printf(ANSI_COLOR_GREEN "[STOP]\tExit smvp-toolbox v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
