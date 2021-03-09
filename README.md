@@ -3,7 +3,7 @@ Implement sparse matrix vector product calculations using CSR and TJDS compressi
 
 **IMPORTANT: CMake is required to build this program. CMake is available at https://cmake.org/download/**
 
-**The popt development library is required to build this program.**
+**The popt development library is also required to build this program.**
 
 Install popt on Debian/Ubuntu:
 ```
