@@ -1,0 +1,52 @@
+Execution results for smvp-toolbox v.0.6.4, CSR algorithm
+Generated on 1615284655 (Unix time)
+
+Sparse matrix file in use:
+./sample-data/ibm32.mtx
+
+Non-zero numbers contained in matrix: 126
+
+Compute times for 1000 iterations:
+
+Total Time: 0.4319 ms
+Average Time: 0.0004319 ms
+Fastest Time: 0.0004 ms
+Slowest Time: 0.0083 ms
+Time StDev: 0.000266369 ms
+
+Output vector (one cell per line):
+[
+6
+6
+8
+4
+4
+5
+3
+3
+4
+3
+4
+5
+4
+3
+3
+4
+4
+4
+2
+3
+5
+3
+5
+5
+2
+5
+6
+3
+3
+2
+2
+3
+]
+
