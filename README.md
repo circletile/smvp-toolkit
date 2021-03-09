@@ -17,14 +17,14 @@ brew install popt
 ```
 
 
-smvp-toolkit build instructions:
+**smvp-toolkit build instructions:**
 ```
 git clone https://github.com/circletile/smvp-toolkit.git
 cd smvp-csr
 cmake --build ./build --config release --clean-first
 ```
 
-smvp-toolkit run instructions:
+**smvp-toolkit run instructions:**
 ```
 ./build/smvp-toolkit-cli --all-algs -n 1000 /path/to/matrixmarket/file.mtx
 
