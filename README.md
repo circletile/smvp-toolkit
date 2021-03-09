@@ -10,7 +10,7 @@ Install popt on Debian/Ubuntu:
 apt install libpopt-devel
 ```
 
-Install popt on OSX (requires Homebrew):
+Install popt on OSX (requires [Homebrew](https://brew.sh/):
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install popt
