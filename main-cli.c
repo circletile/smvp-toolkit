@@ -1,14 +1,14 @@
 /* 
 *  ==================================================================
-*  main-cli.c v0.5.1 for smvp-toolbox
+*  main-cli.c v0.6.2 for smvp-toolbox
 *  ==================================================================
 */
 
 #define MAJOR_VER 0
-#define MINOR_VER 5
-#define REVISION_VER 1
+#define MINOR_VER 6
+#define REVISION_VER 2
 #define SMVP_CSR_DEBUG 0
-#define SMVP_TJDS_DEBUG 1
+#define SMVP_TJDS_DEBUG 0
 
 #include <math.h>
 #include <stdio.h>
@@ -458,7 +458,6 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     struct timespec *time_run_start = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
     struct timespec *time_run_end = (struct timespec *)malloc(sizeof(struct timespec) * compiter);
 
-
     if (SMVP_TJDS_DEBUG)
     {
         printf(ANSI_COLOR_RED "[DEBUG]\tIF YOU CAN READ THIS MESSAGE, TJDS IMPLEMENTATION MAY BE INCOMPLETE AND/OR BROKEN\n" ANSI_COLOR_RESET);
@@ -556,23 +555,28 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     }
 
     // Generate reordering table
+    // Iterate through the entire set of NNZs...
     for (index = 0; index < fInputNonZeros; index++)
     {
+        // ...if a column change is imminent...
         if (mmCloneData[index].col < mmCloneData[index + 1].col)
         {
-            // ...document the column length and position of the previous column....
+            // ...document the column length and position of the column.
             txList[mmCloneData[index].col].colLength = mmCloneData[index].row;
             txList[mmCloneData[index].col].originCol = mmCloneData[index].col;
         }
 
-        // ...and this is also the last NNZ...
+        // If this is the last NNZ in the set...
         if (index == fInputNonZeros - 1)
         {
-            // ...document the column length and position of the this last column.
+            // ...document the column length and position of the the column.
             txList[mmCloneData[index].col].colLength = mmCloneData[index].row;
             txList[mmCloneData[index].col].originCol = mmCloneData[index].col;
         }
     }
+
+    // Derive number of transpose jagged diagonals for later use in TJDS computation
+    num_tjdiag = txList[0].colLength + 1;
 
     // 3. Sort reordering table
     qsort(txList, (size_t)fInputColumns, sizeof(TXTable), txtable_comparator_len);
@@ -613,7 +617,7 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         }
     }
 
-    // 5. Reassign multiplication vector rows by using reordering vectoes
+    // 5. Reassign multiplication vector rows by using reordering table
     onesVectorTemp = (double *)malloc(sizeof(double) * (long unsigned int)fInputRows);
     for (index = 0; index < fInputRows; index++)
     {
@@ -676,9 +680,6 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         }
     }
 
-    // Derive number of transpose jagged diagonals
-    num_tjdiag = fInputRows - 1;
-
     if (SMVP_TJDS_DEBUG)
     {
         printf("[DEBUG]\tTJDS PHASE 7: Pre-Calc Fields:\n");
@@ -695,14 +696,15 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         }
         printf("]\n");
         printf("\tstart_pos:\t[");
-        for (index = 0; index < fInputRows - 2; index++)
+        for (index = 0; index < num_tjdiag + 1; index++)
         {
             printf("%d, ", workingMatrix.start_pos[index]);
         }
         printf("]\n\n");
+        printf("\tnum_tjdiag (count, not 0-index):\t%d", num_tjdiag);
+        printf("\n\n");
     }
 
-    //free(mmImportData);
     free(mmCloneData);
 
     printf(ANSI_COLOR_YELLOW "[INFO]\tCalculating %d iterations of SMVP TJDS.\n" ANSI_COLOR_RESET, compiter);
@@ -722,14 +724,12 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         // Capture compute run start time
         clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_start[i]);
 
-        for (index = 0; index < num_tjdiag; index++)
+        for (index = 0; index < num_tjdiag + 1; index++)
         {
-            k = 0;
-            for (j = workingMatrix.start_pos[index]; j < workingMatrix.start_pos[index + 1] - 1; j++)
+            for (j = workingMatrix.start_pos[index]; j < workingMatrix.start_pos[index + 1]; j++)
             {
-                p = workingMatrix.row_ind[k];
-                outputVector[p] += workingMatrix.val[j] * onesVector[k];
-                k++;
+                p = workingMatrix.row_ind[j];
+                outputVector[p] += workingMatrix.val[j] * onesVector[p];
             }
         }
 
@@ -1046,7 +1046,7 @@ int main(int argc, const char *argv[])
     printf(ANSI_COLOR_CYAN "[DATA]\tNon-zero numbers contained in matrix: " ANSI_COLOR_RESET "%d\n", fInputNonZeros);
     printf(ANSI_COLOR_CYAN "[DATA]\tVector operand in use: " ANSI_COLOR_RESET "Ones vector with dimensions [%d, %d]\n", fInputRows, 1);
 
-    // Run each algorithm selected by user
+    // Run every SMVP algorithm selected by user
     if (alg_mode & ALG_CSR)
     {
         // DO CSR
@@ -1067,7 +1067,7 @@ int main(int argc, const char *argv[])
         generateReportText(inputFileName, ALG_TJDS, fInputNonZeros, fInputRows, calc_iter, output_vector_tjds, tjds_time);
     }
 
-    printf(ANSI_COLOR_GREEN "[STOP]\tExit smvp-csr v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
+    printf(ANSI_COLOR_GREEN "[STOP]\tExit smvp-toolbox v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
 
     return 0;
 }
