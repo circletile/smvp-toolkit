@@ -1,16 +1,17 @@
 /* 
 *  ==================================================================
-*  main-cli.c v0.6.3 for smvp-toolbox
+*  main-cli.c v0.6.4 for smvp-toolbox
 *  ==================================================================
 */
 
 #define MAJOR_VER 0
 #define MINOR_VER 6
-#define REVISION_VER 3
+#define REVISION_VER 4
 #define SMVP_CSR_DEBUG 0
 #define SMVP_TJDS_DEBUG 0
 
 #include <math.h>
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -293,11 +294,11 @@ void generateReportText(const char *inputFileName, char *reportPath, int alg_mod
     fprintf(reportOutputFile, "Sparse matrix file in use:\n%s\n\n", inputFileName);
     fprintf(reportOutputFile, "Non-zero numbers contained in matrix: %d\n\n", fInputNonZeros);
     fprintf(reportOutputFile, "Compute times for %d iterations:\n\n", iter);
-    fprintf(reportOutputFile, "Total Time: %g seconds\n", timeData->time_total);
-    fprintf(reportOutputFile, "Average Time: %g seconds\n", timeData->time_avg);
-    fprintf(reportOutputFile, "Fastest Time: %g seconds\n", timeData->time_min);
-    fprintf(reportOutputFile, "Slowest Time: %g seconds\n", timeData->time_max);
-    fprintf(reportOutputFile, "Time StDev: %g seconds\n\n", timeData->time_stdev);
+    fprintf(reportOutputFile, "Total Time: %g ms\n", timeData->time_total);
+    fprintf(reportOutputFile, "Average Time: %g ms\n", timeData->time_avg);
+    fprintf(reportOutputFile, "Fastest Time: %g ms\n", timeData->time_min);
+    fprintf(reportOutputFile, "Slowest Time: %g ms\n", timeData->time_max);
+    fprintf(reportOutputFile, "Time StDev: %g ms\n\n", timeData->time_stdev);
     fprintf(reportOutputFile, "Output vector (one cell per line):\n");
     fprintf(reportOutputFile, "[\n");
     for (index = 0; index < fInputRows; index++)
@@ -421,11 +422,12 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
     // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
     //
 
-    // Convert all per-run timespec structs to time in seconds & populate time structure
+    // Convert all per-run timespec structs to time in milliseconds & populate time structure
     for (i = 0; i < compiter; i++)
     {
-        time_run[i] = (double)(time_run_end[i].tv_sec - time_run_start[i].tv_sec) * 1e9;
-        time_run[i] = (comp_time_taken + (double)(time_run_end[i].tv_nsec - time_run_start[i].tv_nsec)) * 1e-9;
+        // Calculate runtime in ns, then convert to ms
+        time_run[i] = (double)((time_run_end[i].tv_sec * 1e9 + time_run_end[i].tv_nsec) - (time_run_start[i].tv_sec * 1e9 + time_run_start[i].tv_nsec));
+        time_run[i] /= 1e6;
 
         csr_time->time_each[i] = time_run[i];
         csr_time->time_total += time_run[i];
@@ -736,7 +738,7 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
     //
 
-    // Compute CSR SMVP (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
+    // Compute TJDS SMVP (technically y=Axn, not y=x(A^n) as indicated in reqs doc, but is an approved deviation)
     for (i = 0; i < compiter; i++)
     {
 
@@ -764,11 +766,12 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
     //
 
-    // Convert all per-run timespec structs to time in seconds & populate time structure
+    // Convert all per-run timespec structs to time in milliseconds & populate time structure
     for (i = 0; i < compiter; i++)
     {
-        time_run[i] = (double)(time_run_end[i].tv_sec - time_run_start[i].tv_sec) * 1e9;
-        time_run[i] = (comp_time_taken + (double)(time_run_end[i].tv_nsec - time_run_start[i].tv_nsec)) * 1e-9;
+        // Calculate runtime in ns, then convert to ms
+        time_run[i] = (double)((time_run_end[i].tv_sec * 1e9 + time_run_end[i].tv_nsec) - (time_run_start[i].tv_sec * 1e9 + time_run_start[i].tv_nsec));
+        time_run[i] /= 1e6;
 
         tjds_time->time_each[i] = time_run[i];
         tjds_time->time_total += time_run[i];
