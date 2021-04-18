@@ -761,6 +761,39 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_end[i]);
     }
 
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < 33; j++)
+        {
+            if (j < workingMatrix.start_pos[i+1] - workingMatrix.start_pos[i] + i && j >= i)
+            {
+                printf("a_ij[%d][%d] = 1'b1;\n", i, j);
+            }
+            else
+            {
+                printf("a_ij[%d][%d] = 1'b0;\n", i, j);
+            }
+        }
+    }
+
+    int temp = 0;
+
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < 33; j++)
+        {
+            if (j < workingMatrix.start_pos[i+1] - workingMatrix.start_pos[i] + i && j >= i)
+            {
+                printf("i[%d][%d] = %d;\n", i, j, workingMatrix.row_ind[temp]);
+                temp++;
+            }
+            else
+            {
+                printf("i[%d][%d] = 1'b0;\n", i, j);
+            }
+        }
+    }
+
     //
     // ATOMIC SECTION END
     // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
