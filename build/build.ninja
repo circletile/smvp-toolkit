@@ -74,8 +74,6 @@ build CMakeFiles/mmio-writetest.dir/mmio-writetest.c.o: C_COMPILER__mmio-writete
   INCLUDES = -I../
   OBJECT_DIR = CMakeFiles/mmio-writetest.dir
   OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir
-  TARGET_COMPILE_PDB = CMakeFiles/mmio-writetest.dir/
-  TARGET_PDB = mmio-writetest.pdb
 build CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o: C_COMPILER__mmio-writetest ../mmio/mmio.c || cmake_object_order_depends_target_mmio-writetest
   DEFINES = -D_XOPEN_SOURCE=700
   DEP_FILE = CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o.d
@@ -83,8 +81,6 @@ build CMakeFiles/mmio-writetest.dir/mmio/mmio.c.o: C_COMPILER__mmio-writetest ..
   INCLUDES = -I../
   OBJECT_DIR = CMakeFiles/mmio-writetest.dir
   OBJECT_FILE_DIR = CMakeFiles/mmio-writetest.dir/mmio
-  TARGET_COMPILE_PDB = CMakeFiles/mmio-writetest.dir/
-  TARGET_PDB = mmio-writetest.pdb
 
 # =============================================================================
 # Link build statements for EXECUTABLE target mmio-writetest
@@ -99,9 +95,8 @@ build mmio-writetest: C_EXECUTABLE_LINKER__mmio-writetest CMakeFiles/mmio-writet
   OBJECT_DIR = CMakeFiles/mmio-writetest.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = CMakeFiles/mmio-writetest.dir/
   TARGET_FILE = mmio-writetest
-  TARGET_PDB = mmio-writetest.pdb
+  TARGET_PDB = mmio-writetest.dbg
 # =============================================================================
 # Object build statements for EXECUTABLE target smvp-toolkit-cli
 
@@ -117,8 +112,6 @@ build CMakeFiles/smvp-toolkit-cli.dir/main-cli.c.o: C_COMPILER__smvp-toolkit-cli
   INCLUDES = -I../
   OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
   OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-cli.dir
-  TARGET_COMPILE_PDB = CMakeFiles/smvp-toolkit-cli.dir/
-  TARGET_PDB = smvp-toolkit-cli.pdb
 build CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o: C_COMPILER__smvp-toolkit-cli ../mmio/mmio.c || cmake_object_order_depends_target_smvp-toolkit-cli
   DEFINES = -D_XOPEN_SOURCE=700
   DEP_FILE = CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o.d
@@ -126,8 +119,6 @@ build CMakeFiles/smvp-toolkit-cli.dir/mmio/mmio.c.o: C_COMPILER__smvp-toolkit-cl
   INCLUDES = -I../
   OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
   OBJECT_FILE_DIR = CMakeFiles/smvp-toolkit-cli.dir/mmio
-  TARGET_COMPILE_PDB = CMakeFiles/smvp-toolkit-cli.dir/
-  TARGET_PDB = smvp-toolkit-cli.pdb
 
 # =============================================================================
 # Link build statements for EXECUTABLE target smvp-toolkit-cli
@@ -143,9 +134,8 @@ build smvp-toolkit-cli: C_EXECUTABLE_LINKER__smvp-toolkit-cli CMakeFiles/smvp-to
   OBJECT_DIR = CMakeFiles/smvp-toolkit-cli.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = CMakeFiles/smvp-toolkit-cli.dir/
   TARGET_FILE = smvp-toolkit-cli
-  TARGET_PDB = smvp-toolkit-cli.pdb
+  TARGET_PDB = smvp-toolkit-cli.dbg
 
 #############################################
 # Utility command for ContinuousSubmit
@@ -305,8 +295,6 @@ build CMakeFiles/mmio-readtest.dir/mmio-readtest.c.o: C_COMPILER__mmio-readtest 
   INCLUDES = -I../
   OBJECT_DIR = CMakeFiles/mmio-readtest.dir
   OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir
-  TARGET_COMPILE_PDB = CMakeFiles/mmio-readtest.dir/
-  TARGET_PDB = mmio-readtest.pdb
 build CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o: C_COMPILER__mmio-readtest ../mmio/mmio.c || cmake_object_order_depends_target_mmio-readtest
   DEFINES = -D_XOPEN_SOURCE=700
   DEP_FILE = CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o.d
@@ -314,8 +302,6 @@ build CMakeFiles/mmio-readtest.dir/mmio/mmio.c.o: C_COMPILER__mmio-readtest ../m
   INCLUDES = -I../
   OBJECT_DIR = CMakeFiles/mmio-readtest.dir
   OBJECT_FILE_DIR = CMakeFiles/mmio-readtest.dir/mmio
-  TARGET_COMPILE_PDB = CMakeFiles/mmio-readtest.dir/
-  TARGET_PDB = mmio-readtest.pdb
 
 # =============================================================================
 # Link build statements for EXECUTABLE target mmio-readtest
@@ -330,9 +316,8 @@ build mmio-readtest: C_EXECUTABLE_LINKER__mmio-readtest CMakeFiles/mmio-readtest
   OBJECT_DIR = CMakeFiles/mmio-readtest.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = CMakeFiles/mmio-readtest.dir/
   TARGET_FILE = mmio-readtest
-  TARGET_PDB = mmio-readtest.pdb
+  TARGET_PDB = mmio-readtest.dbg
 
 #############################################
 # Utility command for ContinuousTest
@@ -592,8 +577,6 @@ build mmio/CMakeFiles/mmio.dir/mmio.c.o: C_COMPILER__mmio ../mmio/mmio.c || cmak
   INCLUDES = -I../
   OBJECT_DIR = mmio/CMakeFiles/mmio.dir
   OBJECT_FILE_DIR = mmio/CMakeFiles/mmio.dir
-  TARGET_COMPILE_PDB = mmio/CMakeFiles/mmio.dir/mmio.pdb
-  TARGET_PDB = mmio/libmmio.pdb
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target mmio
@@ -607,9 +590,8 @@ build mmio/libmmio.a: C_STATIC_LIBRARY_LINKER__mmio mmio/CMakeFiles/mmio.dir/mmi
   OBJECT_DIR = mmio/CMakeFiles/mmio.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_COMPILE_PDB = mmio/CMakeFiles/mmio.dir/mmio.pdb
   TARGET_FILE = mmio/libmmio.a
-  TARGET_PDB = mmio/libmmio.pdb
+  TARGET_PDB = mmio.a.dbg
 
 #############################################
 # Utility command for package_source
@@ -667,13 +649,13 @@ default all
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../mmio/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCCompiler.cmake.in /usr/share/cmake-3.13/Modules/CMakeCCompilerABI.c /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXCompiler.cmake.in /usr/share/cmake-3.13/Modules/CMakeCXXCompilerABI.cpp /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeCompilerIdDetection.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCXXCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCompileFeatures.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCompilerABI.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCompilerId.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineSystem.cmake /usr/share/cmake-3.13/Modules/CMakeFindBinUtils.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeNinjaFindMake.cmake /usr/share/cmake-3.13/Modules/CMakeParseImplicitLinkInfo.cmake /usr/share/cmake-3.13/Modules/CMakeSystem.cmake.in /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CMakeTestCCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeTestCXXCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeTestCompilerCommon.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/Compiler/ADSP-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/ARMCC-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/AppleClang-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Borland-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Bruce-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.13/Modules/Compiler/Clang-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Clang-DetermineCompilerInternal.cmake /usr/share/cmake-3.13/Modules/Compiler/Comeau-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Compaq-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Cray-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Embarcadero-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Fujitsu-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/GHS-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C-FeatureTests.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX-FeatureTests.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-FindBinUtils.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU.cmake /usr/share/cmake-3.13/Modules/Compiler/HP-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/HP-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/IAR-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake /usr/share/cmake-3.13/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake /usr/share/cmake-3.13/Modules/Compiler/Intel-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/MIPSpro-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/MSVC-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/NVIDIA-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/PGI-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/PathScale-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/SCO-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/SDCC-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/SunPro-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/TI-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Watcom-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/XL-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/XL-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/zOS-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/Internal/FeatureTesting.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-Determine-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake CMakeFiles/feature_tests.c CMakeFiles/feature_tests.cxx
+build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../mmio/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake
   pool = console
 
 #############################################
 # A missing CMake input file is not an error.
 
-build ../CMakeLists.txt ../mmio/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCCompiler.cmake.in /usr/share/cmake-3.13/Modules/CMakeCCompilerABI.c /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXCompiler.cmake.in /usr/share/cmake-3.13/Modules/CMakeCXXCompilerABI.cpp /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeCompilerIdDetection.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCXXCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCompileFeatures.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCompilerABI.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineCompilerId.cmake /usr/share/cmake-3.13/Modules/CMakeDetermineSystem.cmake /usr/share/cmake-3.13/Modules/CMakeFindBinUtils.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeNinjaFindMake.cmake /usr/share/cmake-3.13/Modules/CMakeParseImplicitLinkInfo.cmake /usr/share/cmake-3.13/Modules/CMakeSystem.cmake.in /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CMakeTestCCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeTestCXXCompiler.cmake /usr/share/cmake-3.13/Modules/CMakeTestCompilerCommon.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/Compiler/ADSP-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/ARMCC-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/AppleClang-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Borland-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Bruce-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.13/Modules/Compiler/Clang-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Clang-DetermineCompilerInternal.cmake /usr/share/cmake-3.13/Modules/Compiler/Comeau-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Compaq-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Cray-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Embarcadero-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Fujitsu-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/GHS-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C-FeatureTests.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX-FeatureTests.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-FindBinUtils.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU.cmake /usr/share/cmake-3.13/Modules/Compiler/HP-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/HP-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/IAR-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake /usr/share/cmake-3.13/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake /usr/share/cmake-3.13/Modules/Compiler/Intel-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/MIPSpro-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/MSVC-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/NVIDIA-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/PGI-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/PathScale-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/SCO-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/SDCC-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/SunPro-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/TI-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/Watcom-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/XL-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/XL-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/zOS-C-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/Internal/FeatureTesting.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-Determine-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake CMakeFiles/feature_tests.c CMakeFiles/feature_tests.cxx: phony
+build ../CMakeLists.txt ../mmio/CMakeLists.txt /usr/share/cmake-3.13/Modules/CMakeCInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCXXInformation.cmake /usr/share/cmake-3.13/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake-3.13/Modules/CMakeGenericSystem.cmake /usr/share/cmake-3.13/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake-3.13/Modules/CMakeLanguageInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake-3.13/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake-3.13/Modules/CPack.cmake /usr/share/cmake-3.13/Modules/CPackComponent.cmake /usr/share/cmake-3.13/Modules/CTest.cmake /usr/share/cmake-3.13/Modules/CTestTargets.cmake /usr/share/cmake-3.13/Modules/CTestUseLaunchers.cmake /usr/share/cmake-3.13/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-C.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Compiler/GNU.cmake /usr/share/cmake-3.13/Modules/DartConfiguration.tcl.in /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake-3.13/Modules/Platform/Linux-GNU.cmake /usr/share/cmake-3.13/Modules/Platform/Linux.cmake /usr/share/cmake-3.13/Modules/Platform/UnixPaths.cmake /usr/share/cmake-3.13/Templates/CPackConfig.cmake.in CMakeCache.txt CMakeFiles/3.13.4/CMakeCCompiler.cmake CMakeFiles/3.13.4/CMakeCXXCompiler.cmake CMakeFiles/3.13.4/CMakeSystem.cmake: phony
 
 #############################################
 # Clean all the built files.

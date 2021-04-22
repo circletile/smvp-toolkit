@@ -18,6 +18,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <stdint.h>
 #include <popt.h>
 #include "mmio/mmio.h"
 
@@ -761,11 +762,18 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         clock_gettime(CLOCK_MONOTONIC_RAW, &time_run_end[i]);
     }
 
-    for (int i = 0; i < 7; i++)
+    //
+    // ATOMIC SECTION END
+    // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
+    //
+
+    // Inline Vivado LUT builder
+
+    for (int i = 0; i < 9 + 1; i++)
     {
-        for (int j = 0; j < 33; j++)
+        for (int j = 0; j < 36519 + 1; j++)
         {
-            if (j < workingMatrix.start_pos[i+1] - workingMatrix.start_pos[i] + i && j >= i)
+            if (j < workingMatrix.start_pos[i + 1] - workingMatrix.start_pos[i] + i && j >= i)
             {
                 printf("a_ij[%d][%d] = 1'b1;\n", i, j);
             }
@@ -778,11 +786,11 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
 
     int temp = 0;
 
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 9 + 1; i++)
     {
-        for (int j = 0; j < 33; j++)
+        for (int j = 0; j < 36519 + 1; j++)
         {
-            if (j < workingMatrix.start_pos[i+1] - workingMatrix.start_pos[i] + i && j >= i)
+            if (j < workingMatrix.start_pos[i + 1] - workingMatrix.start_pos[i] + i && j >= i)
             {
                 printf("i[%d][%d] = %d;\n", i, j, workingMatrix.row_ind[temp]);
                 temp++;
@@ -794,10 +802,58 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
         }
     }
 
-    //
-    // ATOMIC SECTION END
-    // PERFORM NO ACTIONS OTHER THAN SMVP BETWEEN START AND END TIME CAPTURES
-    //
+    // // Inline Vivado COE Builder (WIP)
+    // temp = 0;
+    // uint64_t  packed_val_temp = 0;
+    // int coe_memory_depth_min = fInputNonZeros * 2;
+    // int coe_memory_initialization_radix = 64; // this is a constant for the ROM structure we're using
+    //                                           // Given a radix of 48:
+    //                                           // 16U = TJDS_Row_Num (ex. i[X][]), 16M1 = TJDS_Col_Num (ex. i[][X]), 16M2 = TJDS_i_Val, 16L = TLDS_a_ij_val
+    //                                           // !!! RESIZE STRUCTURE IF ANY NUMBER EXCEEDS 4095 !!!
+
+    // printf("******************************************************************\n");
+    // printf("*************  Single Port Block Memory .COE file   **************\n");
+    // printf("******************************************************************\n");
+    // printf("memory_initialization_radix=%d\n", coe_memory_initialization_radix);
+    // printf("memory_initialization_vector=\n");
+    // for (uint16_t i = 0; i < 7; i++)
+    // {
+    //     for (uint16_t j = 0; j < 33; j++)
+    //     {
+    //         packed_val_temp = 0;
+
+    //         packed_val_temp |= ( i << 48);
+    //         packed_val_temp |= ( j << 32);
+
+    //         if (j < workingMatrix.start_pos[i + 1] - workingMatrix.start_pos[i] + i && j >= i)
+    //         {
+    //             packed_val_temp |= (1<<0);
+    //         }
+    //         else
+    //         {
+    //             packed_val_temp |= (0<<0);
+    //         }
+
+    //         if (j < workingMatrix.start_pos[i + 1] - workingMatrix.start_pos[i] + i && j >= i)
+    //         {
+    //             packed_val_temp |= ((uint16_t)(workingMatrix.row_ind[temp]) << 16);
+    //             temp++;
+    //         }
+    //         else
+    //         {
+    //             packed_val_temp |= (0 << 12);
+    //         }
+            
+    //         if ((i == num_tjdiag - 1) && (j == fInputRows - 1))
+    //         {
+    //             printf("[%d][%d]\t%x;\n", i, j, packed_val_temp);
+    //         }
+    //         else
+    //         {
+    //             printf("[%d][%d]\t%x,\n", i, j, packed_val_temp);
+    //         }
+    //     }
+    // }
 
     // Convert all per-run timespec structs to time in milliseconds & populate time structure
     for (i = 0; i < compiter; i++)
