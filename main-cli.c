@@ -475,13 +475,12 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
 
     typedef struct _cisr_value_data_
     {
-        int *val;
-        int *col_ind;
-        int *slot;
+        double val;
+        int col_ind;
+        int slot;
     } CISRValData;
 
     CSRData workingMatrix;
-    CISRValData cisr_valData;
     int i, j, index;
 
     int *cisr_rowLengths = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
@@ -498,9 +497,9 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
 
     // Allocate memory for CISR storage
-    cisr_valData.val = (int *)malloc(sizeof(int) * (long unsigned int)(fInputNonZeros));
-    cisr_valData.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
-    cisr_valData.slot = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
+    // cisr_valData.val = (double *)malloc(sizeof(int) * (long unsigned int)(fInputNonZeros));
+    // cisr_valData.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
+    // cisr_valData.slot = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
 
     // Convert MatrixMarket format into CSR format
     for (index = 0; index < fInputNonZeros; index++)
@@ -545,7 +544,7 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
 
     // For each slot group...
     // while ( (csr_rowptr_iter < fInputRows) && (csr_eof == 0) ) // continue until the EOF nzn index is reached, but DON'T increment it up here
-    while ( csr_eof == 0 ) // continue until the EOF nzn index is reached, but DON'T increment it up here
+    while (csr_eof == 0) // continue until the EOF nzn index is reached, but DON'T increment it up here
     {
 
         //... initially, pick the first nzn index of each row until all slots are filled.
@@ -607,7 +606,7 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
         csr_eof = 1;
         for (int wer = 0; wer < slotCount; wer++)
         {
-            if (slotgrp[slot_grp_iter][wer] < fInputNonZeros )
+            if (slotgrp[slot_grp_iter][wer] < fInputNonZeros)
                 csr_eof = 0;
         }
 
@@ -617,16 +616,15 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
         if (slot_grp_iter >= fInputNonZeros)
         {
             printf("\n[ERROR]\tslot_group_iter overran fInputNonZeros!\n");
-            //  exit(EXIT_FAILURE);
-            break;
+            exit(EXIT_FAILURE);
         }
     }
 
     // save the total number of slot groups for later use
     int slot_grp_total = slot_grp_iter;
 
+    // Readback of slotgrp 2d array
     printf("[DEBUG]\tslot group total: %d\n", slot_grp_total);
-
     for (int qaz = 0; qaz < slot_grp_total; qaz++)
     {
         printf("\n[DEBUG]\tslot group: %d\n", qaz);
@@ -636,7 +634,41 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
         }
     }
 
+
+    CISRValData cisr_valData[slot_grp_total * slotCount + 1];
+    int cisrdata_iter_1 = 0;
+
     // After determining the slot group assignments, expand the associated values into a usable data structure
+    for (int slotgrp_iter_1 = 0; slotgrp_iter_1 < slot_grp_total; slotgrp_iter_1++)
+    {
+        for (int slot_iter_1 = 0; slot_iter_1 < slotCount; slot_iter_1++)
+        {
+            printf("\n[DEBUG] slotgrp[slotgrp_iter_1][slot_iter_1] = %d\n", slotgrp[slotgrp_iter_1][slot_iter_1]);
+            if (slotgrp[slotgrp_iter_1][slot_iter_1] >= fInputNonZeros)
+            {
+                printf("val[%d] = %g\n", cisrdata_iter_1, (double)999999);
+                cisr_valData[cisrdata_iter_1].val = 999999;
+                printf("col_ind[%d] = %g\n", cisrdata_iter_1, (double)999999);
+                cisr_valData[cisrdata_iter_1].col_ind = 999999;
+            }
+            else
+            {
+                printf("val[%d] = %g\n", cisrdata_iter_1, workingMatrix.val[slotgrp[slotgrp_iter_1][slot_iter_1]]);
+                cisr_valData[cisrdata_iter_1].val = workingMatrix.val[slotgrp[slotgrp_iter_1][slot_iter_1]];
+                printf("col_ind[%d] = %g\n", cisrdata_iter_1, workingMatrix.col_ind[slotgrp[slotgrp_iter_1][slot_iter_1]]);
+                cisr_valData[cisrdata_iter_1].col_ind = workingMatrix.col_ind[slotgrp[slotgrp_iter_1][slot_iter_1]];
+            }
+            cisr_valData[cisrdata_iter_1].slot = slot_iter_1;
+            cisrdata_iter_1++;
+        }
+    }
+
+    // After determining the slot group assignments, expand the associated values into a usable data structure
+    for (int cisrdata_iter_2 = 0; cisrdata_iter_2 < (slot_grp_total * slotCount); cisrdata_iter_2++)
+    {
+        printf("\nCISR Index: %d", cisrdata_iter_2);
+        printf("\nval: %g, col_ind: %d, slot: %d\n", cisr_valData[cisrdata_iter_2].val, cisr_valData[cisrdata_iter_2].col_ind, cisr_valData[cisrdata_iter_2].slot);
+    }
 }
 
 // Function: smvp_tjds_compute
