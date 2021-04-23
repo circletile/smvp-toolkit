@@ -1,0 +1,26 @@
+Execution results for smvp-toolbox v.0.6.4, CSR algorithm
+Generated on 1619162887 (Unix time)
+
+Sparse matrix file in use:
+../sample-data/pdp08-pg4.mtx
+
+Non-zero numbers contained in matrix: 16
+
+Compute times for 1 iterations:
+
+Total Time: 0.0001 ms
+Average Time: 0.0001 ms
+Fastest Time: 0.0001 ms
+Slowest Time: 0.0001 ms
+Time StDev: 0 ms
+
+Output vector (one cell per line):
+[
+6
+21
+1
+7
+14
+7
+]
+

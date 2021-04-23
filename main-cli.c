@@ -7,7 +7,7 @@
 #define MAJOR_VER 0
 #define MINOR_VER 6
 #define REVISION_VER 4
-#define SMVP_CSR_DEBUG 0
+#define SMVP_CSR_DEBUG 1
 #define SMVP_TJDS_DEBUG 0
 
 #include <math.h>
@@ -31,10 +31,11 @@
 #define ANSI_COLOR_CYAN "\x1b[36m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
-#define ALG_ALL 255
+#define ALG_ALL 256
 #define ALG_NONE 0
 #define ALG_CSR (1 << 1)
 #define ALG_TJDS (1 << 2)
+#define ALG_CISR (1 << 3)
 
 // Struct: _mm_raw_data_
 // Provides a convenient structure for importing/exporting Matrix Market file contents
@@ -467,6 +468,177 @@ double *smvp_csr_compute(MMRawData *mmImportData, int fInputRows, int fInputNonZ
     return outputVector;
 }
 
+// Function: smvp_cisr_coegen
+// Generates CISR COE data file
+void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZeros, int slotCount) //, const char *inputFileName, char *reportPath)
+{
+
+    typedef struct _cisr_value_data_
+    {
+        int *val;
+        int *col_ind;
+        int *slot;
+    } CISRValData;
+
+    CSRData workingMatrix;
+    CISRValData cisr_valData;
+    int i, j, index;
+
+    int *cisr_rowLengths = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
+
+    // Convert loaded data to CSR format
+    printf(ANSI_COLOR_YELLOW "[INFO]\tConverting loaded content to CISR format.\n" ANSI_COLOR_RESET);
+
+    // Sort imported data now to simplify future data processing
+    qsort(mmImportData, (size_t)fInputNonZeros, sizeof(MMRawData), mmrd_comparator_row_col);
+
+    // Allocate memory for CSR storage
+    workingMatrix.row_ptr = (int *)malloc(sizeof(int) * (long unsigned int)(fInputRows + 1));
+    workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
+    workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
+
+    // Allocate memory for CISR storage
+    cisr_valData.val = (int *)malloc(sizeof(int) * (long unsigned int)(fInputNonZeros));
+    cisr_valData.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
+    cisr_valData.slot = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
+
+    // Convert MatrixMarket format into CSR format
+    for (index = 0; index < fInputNonZeros; index++)
+    {
+        workingMatrix.val[index] = mmImportData[index].val;
+        workingMatrix.col_ind[index] = mmImportData[index].col;
+
+        if (index == fInputNonZeros - 1)
+        {
+            workingMatrix.row_ptr[mmImportData[index].row + 1] = fInputNonZeros;
+        }
+        else if (mmImportData[index].row < mmImportData[(index + 1)].row)
+        {
+            workingMatrix.row_ptr[mmImportData[index].row + 1] = index + 1;
+        }
+        else if (index == 0)
+        {
+            workingMatrix.row_ptr[mmImportData[index].row] = 0;
+        }
+    }
+
+    //
+    // Convert CSR format into CISR format
+    //
+
+    int(*slotgrp)[slotCount];
+
+    int slot_rowend[slotCount];
+    for (int clean_0 = 0; clean_0 < slotCount; clean_0++)
+    {
+        slot_rowend[clean_0] = 0;
+    }
+
+    slotgrp = malloc(sizeof(*slotgrp) * fInputNonZeros + 1); //absolute worst case size
+
+    int slot_grp_iter = 0;
+    int csr_rowptr_iter = 0;
+    int csr_eof = 0;
+
+    printf("\n[DEBUG]\tslot count: %d\n", slotCount);
+    printf("[DEBUG]\tfInputRows: %d\n", fInputRows);
+
+    // For each slot group...
+    // while ( (csr_rowptr_iter < fInputRows) && (csr_eof == 0) ) // continue until the EOF nzn index is reached, but DON'T increment it up here
+    while ( csr_eof == 0 ) // continue until the EOF nzn index is reached, but DON'T increment it up here
+    {
+
+        //... initially, pick the first nzn index of each row until all slots are filled.
+        if (slot_grp_iter == 0)
+        {
+            for (int slot_num_iter = 0; slot_num_iter < slotCount; slot_num_iter++)
+            {
+                // First, make sure there are more new rows available to choose from
+                if (csr_rowptr_iter < fInputRows)
+                {
+                    slotgrp[slot_grp_iter][slot_num_iter] = workingMatrix.row_ptr[csr_rowptr_iter];
+                    slot_rowend[slot_num_iter] = workingMatrix.row_ptr[csr_rowptr_iter + 1];
+                    // printf("[INFO]\tcsr_rowptr_iter++ on 558\n");
+                    csr_rowptr_iter++;
+                    // printf("[INFO]\tcsr_rowptr_iter: %d\n\n", csr_rowptr_iter);
+                }
+                else
+                {
+                    // If there aren't any more rows available, assign an invalid index (overflowing seems safer than NULL or negatives)
+                    slotgrp[slot_grp_iter][slot_num_iter] = workingMatrix.row_ptr[fInputRows] + 1;
+                }
+            }
+        }
+        else
+        {
+            // Continue adding the next available nzn for each row
+            for (int slot_num_iter = 0; slot_num_iter < slotCount; slot_num_iter++)
+            {
+                // ... unless the current slot runs out of row values to retreive (runs into the next row ptr)
+                if ((slotgrp[slot_grp_iter - 1][slot_num_iter]) >= slot_rowend[slot_num_iter] - 1)
+                {
+                    // First, make sure there are more new rows available to choose from
+                    if (csr_rowptr_iter >= fInputRows)
+                    {
+                        // If there aren't any more rows available, assign an invalid index (overflowing seems safer than NULL or negatives)
+                        slotgrp[slot_grp_iter][slot_num_iter] = workingMatrix.row_ptr[fInputRows] + 1;
+                    }
+                    else
+                    {
+                        // if more rows are available, pick up a new row for the current slot
+                        slotgrp[slot_grp_iter][slot_num_iter] = workingMatrix.row_ptr[csr_rowptr_iter];
+                        slot_rowend[slot_num_iter] = workingMatrix.row_ptr[csr_rowptr_iter + 1];
+                        // printf("[DEBUG]\t\tslot %d: %d\n", slot_num_iter, slotgrp[slot_grp_iter][slot_num_iter]);
+                        // printf("[DEBUG]\t\tcsr_rowptr_iter: %d\n", csr_rowptr_iter);
+                        // printf("[INFO]\tcsr_rowptr_iter++ on 587\n");
+                        csr_rowptr_iter++;
+                        // printf("[INFO]\tcsr_rowptr_iter: %d\n\n", csr_rowptr_iter);
+                    }
+                }
+                else
+                {
+                    // If the row still has values, just add the next available nzn
+                    slotgrp[slot_grp_iter][slot_num_iter] = slotgrp[slot_grp_iter - 1][slot_num_iter] + 1;
+                }
+            }
+        }
+
+        // Make sure at least one of the stored row values is valid (EOF detection)
+        csr_eof = 1;
+        for (int wer = 0; wer < slotCount; wer++)
+        {
+            if (slotgrp[slot_grp_iter][wer] < fInputNonZeros )
+                csr_eof = 0;
+        }
+
+        // Finally, move to the next slot group
+        slot_grp_iter++;
+
+        if (slot_grp_iter >= fInputNonZeros)
+        {
+            printf("\n[ERROR]\tslot_group_iter overran fInputNonZeros!\n");
+            //  exit(EXIT_FAILURE);
+            break;
+        }
+    }
+
+    // save the total number of slot groups for later use
+    int slot_grp_total = slot_grp_iter;
+
+    printf("[DEBUG]\tslot group total: %d\n", slot_grp_total);
+
+    for (int qaz = 0; qaz < slot_grp_total; qaz++)
+    {
+        printf("\n[DEBUG]\tslot group: %d\n", qaz);
+        for (int xyz = 0; xyz < slotCount; xyz++)
+        {
+            printf("[DEBUG]\t\tslot %d: %d\n", xyz, slotgrp[qaz][xyz]);
+        }
+    }
+
+    // After determining the slot group assignments, expand the associated values into a usable data structure
+}
+
 // Function: smvp_tjds_compute
 // Calculates SMVP using TJDS algorithm
 // Returns results vector directly, time data via pointer
@@ -843,7 +1015,7 @@ double *smvp_tjds_compute(MMRawData *mmImportData, int fInputRows, int fInputCol
     //         {
     //             packed_val_temp |= (0 << 12);
     //         }
-            
+
     //         if ((i == num_tjdiag - 1) && (j == fInputRows - 1))
     //         {
     //             printf("[%d][%d]\t%x;\n", i, j, packed_val_temp);
@@ -964,7 +1136,7 @@ int main(int argc, const char *argv[])
     FILE *mmInputFile;
     MM_typecode matcode;
     poptContext optCon;
-    int mmio_rb_return, mmio_rs_return, index, alg_mode, calc_iter;
+    int mmio_rb_return, mmio_rs_return, index, alg_mode, calc_iter, cisr_slots;
     int fInputRows, fInputCols, fInputNonZeros;
     int *iteration_time;
     double *output_vector;
@@ -974,6 +1146,7 @@ int main(int argc, const char *argv[])
     struct _popt_field
     {
         int iter;
+        int slots;
         char *outputFolder;
 
     } popt_field;
@@ -981,8 +1154,10 @@ int main(int argc, const char *argv[])
     struct poptOption optionsTable[] = {
         {"all-algs", 'a', POPT_ARG_NONE, NULL, 'a', "Enable all SMVP algorithms.", NULL},
         {"csr", 'c', POPT_ARG_NONE, NULL, 'c', "Enable CSR SMVP algorithm.", NULL},
+        {"cisr-gen", 'g', POPT_ARG_NONE, NULL, 'g', "Generate CISR COE file.", NULL},
         {"tjds", 't', POPT_ARG_NONE, NULL, 't', "Enable TJDS SMVP algorithm.", NULL},
         {"number", 'n', POPT_ARG_INT, &popt_field.iter, 'n', "Number of computation iterations per-algorithm.", "1000"},
+        {"slots", 's', POPT_ARG_INT, &popt_field.slots, 's', "Number of slots for CISR.", "16"},
         {"dir", 'd', POPT_ARG_STRING, &popt_field.outputFolder, 'd', "Output folder for reports.", "./"},
         POPT_AUTOHELP
             POPT_TABLEEND};
@@ -995,6 +1170,9 @@ int main(int argc, const char *argv[])
 
     // Define default algorithm iteration count
     calc_iter = 1000;
+
+    // Define default CISR slot count
+    cisr_slots = 16;
 
     // Display usage if no arguments are specified
     if (argc < 2)
@@ -1041,6 +1219,17 @@ int main(int argc, const char *argv[])
                 alg_mode += ALG_TJDS;
                 break;
             }
+        case 'g':
+            if (alg_mode == ALG_ALL)
+            {
+                printf(ANSI_COLOR_RED "[ERROR]\tCombining [-a|--all] with other algorithm flags is not supported.\n" ANSI_COLOR_RESET);
+                exit(1);
+            }
+            else
+            {
+                alg_mode += ALG_CISR;
+                break;
+            }
         case 'n':
             if (popt_field.iter >= 1)
             {
@@ -1049,6 +1238,17 @@ int main(int argc, const char *argv[])
             else
             {
                 printf(ANSI_COLOR_RED "[ERROR]\tInvalid number of algorithm iterations specified.\n" ANSI_COLOR_RESET);
+                exit(1);
+            }
+            break;
+        case 's':
+            if (popt_field.slots >= 1)
+            {
+                cisr_slots = popt_field.slots;
+            }
+            else
+            {
+                printf(ANSI_COLOR_RED "[ERROR]\tInvalid number of CISR slots specified.\n" ANSI_COLOR_RESET);
                 exit(1);
             }
             break;
@@ -1179,6 +1379,11 @@ int main(int argc, const char *argv[])
         struct _time_data_ *tjds_time = newResultsData(tjds_time, calc_iter);
         double *output_vector_tjds = smvp_tjds_compute(mmImportData, fInputRows, fInputCols, fInputNonZeros, calc_iter, tjds_time);
         generateReportText(inputFileName, reportPath, ALG_TJDS, fInputNonZeros, fInputRows, calc_iter, output_vector_tjds, tjds_time);
+    }
+    if (alg_mode & ALG_CISR)
+    {
+        // DO CISR COE
+        smvp_cisr_coegen(mmImportData, fInputRows, fInputNonZeros, cisr_slots); //, const char *inputFileName, char *reportPath)
     }
 
     printf(ANSI_COLOR_GREEN "[STOP]\tExit smvp-toolbox v%d.%d.%d\n\n" ANSI_COLOR_RESET, MAJOR_VER, MINOR_VER, REVISION_VER);
