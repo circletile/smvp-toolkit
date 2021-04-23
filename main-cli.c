@@ -634,7 +634,6 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
         }
     }
 
-
     CISRValData cisr_valData[slot_grp_total * slotCount + 1];
     int cisrdata_iter_1 = 0;
 
@@ -646,10 +645,10 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
             printf("\n[DEBUG] slotgrp[slotgrp_iter_1][slot_iter_1] = %d\n", slotgrp[slotgrp_iter_1][slot_iter_1]);
             if (slotgrp[slotgrp_iter_1][slot_iter_1] >= fInputNonZeros)
             {
-                printf("val[%d] = %g\n", cisrdata_iter_1, (double)999999);
-                cisr_valData[cisrdata_iter_1].val = 999999;
-                printf("col_ind[%d] = %g\n", cisrdata_iter_1, (double)999999);
-                cisr_valData[cisrdata_iter_1].col_ind = 999999;
+                printf("val[%d] = %g\n", cisrdata_iter_1, (double)4095);
+                cisr_valData[cisrdata_iter_1].val = 4095;
+                printf("col_ind[%d] = %g\n", cisrdata_iter_1, (double)4095);
+                cisr_valData[cisrdata_iter_1].col_ind = 4095;
             }
             else
             {
@@ -663,11 +662,41 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
         }
     }
 
-    // After determining the slot group assignments, expand the associated values into a usable data structure
+    // Readback of cisr_valdata structure
     for (int cisrdata_iter_2 = 0; cisrdata_iter_2 < (slot_grp_total * slotCount); cisrdata_iter_2++)
     {
         printf("\nCISR Index: %d", cisrdata_iter_2);
         printf("\nval: %g, col_ind: %d, slot: %d\n", cisr_valData[cisrdata_iter_2].val, cisr_valData[cisrdata_iter_2].col_ind, cisr_valData[cisrdata_iter_2].slot);
+    }
+
+    // Pack cisr_valdata as structures as 36-bit memory structures
+    //CISR Packed Memory Format
+
+    // Hex	0x	C VVVV VVVV
+    // C = Control Code		V = Payload
+    //
+    // 0	Start of Data		(0x1234 ABCD)
+    // 1	Value				0xVVVI IINN
+    // 					        	V = Value
+    // 					        	I = Index
+    // 					        	N = Slot Number
+    // 2	Row Length			0xVAAA VBBB
+    // 					        	V = Valid Data Here: 0x1 = valid, 0x0 = invalid/empty
+    // 					        	A = Row length 1
+    // 					        	B = Row Length 2
+    // 3	End of Data			(0xDEAD BEEF)
+
+    printf("\n*****************");
+    printf("\n* CISR COE File *");
+    printf("\n*****************\n");
+
+    uint64_t result = 0;
+
+    for (int cdv_iter = 0; cdv_iter < (slot_grp_total * slotCount); cdv_iter++)
+    {
+        // printf("\nval: %g, col_ind: %d, slot: %d\n", cisr_valData[cdv_iter].val, cisr_valData[cdv_iter].col_ind, cisr_valData[cdv_iter].slot);
+        result = ((int)cisr_valData[cdv_iter].val << 20) | (cisr_valData[cdv_iter].col_ind << 8) | (cisr_valData[cdv_iter].slot << 0);
+        printf("01%08x,\n", result);
     }
 }
 
