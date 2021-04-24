@@ -496,11 +496,6 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     workingMatrix.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
     workingMatrix.val = (double *)malloc(sizeof(double) * (long unsigned int)fInputNonZeros);
 
-    // Allocate memory for CISR storage
-    // cisr_valData.val = (double *)malloc(sizeof(int) * (long unsigned int)(fInputNonZeros));
-    // cisr_valData.col_ind = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
-    // cisr_valData.slot = (int *)malloc(sizeof(int) * (long unsigned int)fInputNonZeros);
-
     // Convert MatrixMarket format into CSR format
     for (index = 0; index < fInputNonZeros; index++)
     {
@@ -539,8 +534,8 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     int csr_rowptr_iter = 0;
     int csr_eof = 0;
 
-    printf("\n[DEBUG]\tslot count: %d\n", slotCount);
-    printf("[DEBUG]\tfInputRows: %d\n", fInputRows);
+    // printf("\n[DEBUG]\tslot count: %d\n", slotCount);
+    // printf("[DEBUG]\tfInputRows: %d\n", fInputRows);
 
     // For each slot group...
     // while ( (csr_rowptr_iter < fInputRows) && (csr_eof == 0) ) // continue until the EOF nzn index is reached, but DON'T increment it up here
@@ -557,9 +552,8 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
                 {
                     slotgrp[slot_grp_iter][slot_num_iter] = workingMatrix.row_ptr[csr_rowptr_iter];
                     slot_rowend[slot_num_iter] = workingMatrix.row_ptr[csr_rowptr_iter + 1];
-                    // printf("[INFO]\tcsr_rowptr_iter++ on 558\n");
+                    cisr_rowLengths[csr_rowptr_iter] = workingMatrix.row_ptr[csr_rowptr_iter + 1] - workingMatrix.row_ptr[csr_rowptr_iter];
                     csr_rowptr_iter++;
-                    // printf("[INFO]\tcsr_rowptr_iter: %d\n\n", csr_rowptr_iter);
                 }
                 else
                 {
@@ -587,11 +581,8 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
                         // if more rows are available, pick up a new row for the current slot
                         slotgrp[slot_grp_iter][slot_num_iter] = workingMatrix.row_ptr[csr_rowptr_iter];
                         slot_rowend[slot_num_iter] = workingMatrix.row_ptr[csr_rowptr_iter + 1];
-                        // printf("[DEBUG]\t\tslot %d: %d\n", slot_num_iter, slotgrp[slot_grp_iter][slot_num_iter]);
-                        // printf("[DEBUG]\t\tcsr_rowptr_iter: %d\n", csr_rowptr_iter);
-                        // printf("[INFO]\tcsr_rowptr_iter++ on 587\n");
+                        cisr_rowLengths[csr_rowptr_iter] = workingMatrix.row_ptr[csr_rowptr_iter + 1] - workingMatrix.row_ptr[csr_rowptr_iter];
                         csr_rowptr_iter++;
-                        // printf("[INFO]\tcsr_rowptr_iter: %d\n\n", csr_rowptr_iter);
                     }
                 }
                 else
@@ -624,15 +615,15 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     int slot_grp_total = slot_grp_iter;
 
     // Readback of slotgrp 2d array
-    printf("[DEBUG]\tslot group total: %d\n", slot_grp_total);
-    for (int qaz = 0; qaz < slot_grp_total; qaz++)
-    {
-        printf("\n[DEBUG]\tslot group: %d\n", qaz);
-        for (int xyz = 0; xyz < slotCount; xyz++)
-        {
-            printf("[DEBUG]\t\tslot %d: %d\n", xyz, slotgrp[qaz][xyz]);
-        }
-    }
+    // printf("[DEBUG]\tslot group total: %d\n", slot_grp_total);
+    // for (int qaz = 0; qaz < slot_grp_total; qaz++)
+    // {
+    //     printf("\n[DEBUG]\tslot group: %d\n", qaz);
+    //     for (int xyz = 0; xyz < slotCount; xyz++)
+    //     {
+    //         printf("[DEBUG]\t\tslot %d: %d\n", xyz, slotgrp[qaz][xyz]);
+    //     }
+    // }
 
     CISRValData cisr_valData[slot_grp_total * slotCount + 1];
     int cisrdata_iter_1 = 0;
@@ -642,19 +633,19 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     {
         for (int slot_iter_1 = 0; slot_iter_1 < slotCount; slot_iter_1++)
         {
-            printf("\n[DEBUG] slotgrp[slotgrp_iter_1][slot_iter_1] = %d\n", slotgrp[slotgrp_iter_1][slot_iter_1]);
+            // printf("\n[DEBUG] slotgrp[slotgrp_iter_1][slot_iter_1] = %d\n", slotgrp[slotgrp_iter_1][slot_iter_1]);
             if (slotgrp[slotgrp_iter_1][slot_iter_1] >= fInputNonZeros)
             {
-                printf("val[%d] = %g\n", cisrdata_iter_1, (double)4095);
-                cisr_valData[cisrdata_iter_1].val = 4095;
-                printf("col_ind[%d] = %g\n", cisrdata_iter_1, (double)4095);
-                cisr_valData[cisrdata_iter_1].col_ind = 4095;
+                // printf("val[%d] = %g\n", cisrdata_iter_1, (double)4095);
+                cisr_valData[cisrdata_iter_1].val = 0; // pad with zeros as per reference spec
+                // printf("col_ind[%d] = %g\n", cisrdata_iter_1, (double)4095);
+                cisr_valData[cisrdata_iter_1].col_ind = 0; // pad with zeros as per reference spec
             }
             else
             {
-                printf("val[%d] = %g\n", cisrdata_iter_1, workingMatrix.val[slotgrp[slotgrp_iter_1][slot_iter_1]]);
+                // printf("val[%d] = %g\n", cisrdata_iter_1, workingMatrix.val[slotgrp[slotgrp_iter_1][slot_iter_1]]);
                 cisr_valData[cisrdata_iter_1].val = workingMatrix.val[slotgrp[slotgrp_iter_1][slot_iter_1]];
-                printf("col_ind[%d] = %g\n", cisrdata_iter_1, workingMatrix.col_ind[slotgrp[slotgrp_iter_1][slot_iter_1]]);
+                // printf("col_ind[%d] = %g\n", cisrdata_iter_1, workingMatrix.col_ind[slotgrp[slotgrp_iter_1][slot_iter_1]]);
                 cisr_valData[cisrdata_iter_1].col_ind = workingMatrix.col_ind[slotgrp[slotgrp_iter_1][slot_iter_1]];
             }
             cisr_valData[cisrdata_iter_1].slot = slot_iter_1;
@@ -663,41 +654,78 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
     }
 
     // Readback of cisr_valdata structure
-    for (int cisrdata_iter_2 = 0; cisrdata_iter_2 < (slot_grp_total * slotCount); cisrdata_iter_2++)
-    {
-        printf("\nCISR Index: %d", cisrdata_iter_2);
-        printf("\nval: %g, col_ind: %d, slot: %d\n", cisr_valData[cisrdata_iter_2].val, cisr_valData[cisrdata_iter_2].col_ind, cisr_valData[cisrdata_iter_2].slot);
-    }
+    // int rl_iter_0 = 0;
+    // for (int cisrdata_iter_2 = 0; cisrdata_iter_2 < (slot_grp_total * slotCount); cisrdata_iter_2++)
+    // {
+    //     printf("\nCISR Index: %d", cisrdata_iter_2);
+    //     printf("\nval: %g, col_ind: %d, slot: %d", cisr_valData[cisrdata_iter_2].val, cisr_valData[cisrdata_iter_2].col_ind, cisr_valData[cisrdata_iter_2].slot);
+    //     if (rl_iter_0 < fInputRows)
+    //     {
+    //         printf("\nrow_length_record: %d\n", cisr_rowLengths[rl_iter_0]);
+    //         rl_iter_0++;
+    //     }
+    //     else
+    //     {
+    //         printf("\n");
+    //     }
+    // }
 
     // Pack cisr_valdata as structures as 36-bit memory structures
     //CISR Packed Memory Format
 
     // Hex	0x	C VVVV VVVV
-    // C = Control Code		V = Payload
-    //
-    // 0	Start of Data		(0x1234 ABCD)
-    // 1	Value				0xVVVI IINN
+    // C = Control Code		    V = Payload
+    // ===================      ==============
+    // 0	Start of Data		(AAAA AAAA)
+    // 1	Value				VVVI IINN
     // 					        	V = Value
     // 					        	I = Index
-    // 					        	N = Slot Number
-    // 2	Row Length			0xVAAA VBBB
+    // 					        	N = Slot Number (8-bit b/c ref design says never use more than 32 channels)
+    // 2	Row Length			VAAA VBBB
     // 					        	V = Valid Data Here: 0x1 = valid, 0x0 = invalid/empty
     // 					        	A = Row length 1
     // 					        	B = Row Length 2
-    // 3	End of Data			(0xDEAD BEEF)
+    // 3	End of Data			(FFFF FFFF)
 
-    printf("\n*****************");
-    printf("\n* CISR COE File *");
-    printf("\n*****************\n");
+    printf("\n;*********************************************");
+    printf("\n;* CISR COE File for Vivado Single-Port BRAM *");
+    printf("\n;*********************************************\n");
 
     uint64_t result = 0;
+    int rl_iter_1 = 0;
 
+    printf("memory_initialization_radix=16;\n");
+    printf("memory_initialization_vector=\n");
+    printf("00%08x,\n", 0xAAAAAAAA);
     for (int cdv_iter = 0; cdv_iter < (slot_grp_total * slotCount); cdv_iter++)
     {
-        // printf("\nval: %g, col_ind: %d, slot: %d\n", cisr_valData[cdv_iter].val, cisr_valData[cdv_iter].col_ind, cisr_valData[cdv_iter].slot);
+        // Generate value (cal + col_ind + slot_num) packed block (Contol Code 1)
         result = ((int)cisr_valData[cdv_iter].val << 20) | (cisr_valData[cdv_iter].col_ind << 8) | (cisr_valData[cdv_iter].slot << 0);
         printf("01%08x,\n", result);
+
+        // Generate row length packed block if entries remain (Contol Code 2)
+        if (rl_iter_1 < fInputRows)
+        {
+            // First of two row-Len entries will always exist if we get to this point
+            result = (1 << 28) | (cisr_rowLengths[rl_iter_1] << 16);
+            rl_iter_1++;
+
+            // Check if another row-Len entry exists after the first one
+            if (rl_iter_1 < fInputRows)
+            {
+                // Another row-Len entry exists, so append it and add a data-valid entry "1" at bit 12
+                result |= (0x1 << 12) | (cisr_rowLengths[rl_iter_1] << 0);
+                rl_iter_1++;
+            }
+            else
+            {
+                // No more row-Len entries exist, so append a zero-value and add a no-data entry "0" at bit 12
+                result |= (0x0 << 12) | (0x000 << 0);
+            }
+            printf("02%08x,\n", result);
+        }
     }
+    printf("03%08x;\n\n", 0xFFFFFFFF);
 }
 
 // Function: smvp_tjds_compute
