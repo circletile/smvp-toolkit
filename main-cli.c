@@ -693,7 +693,7 @@ void smvp_cisr_coegen(MMRawData *mmImportData, int fInputRows, int fInputNonZero
 
     uint64_t result = 0;
     int rl_iter_1 = 0;
-
+    printf("\n;Generated with a slot/channel count of: %d\n\n", slotCount);
     printf("memory_initialization_radix=16;\n");
     printf("memory_initialization_vector=\n");
     printf("00%08x,\n", 0xAAAAAAAA);
